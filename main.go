@@ -26,6 +26,8 @@ func GetFileContentType(path string) (string, error) {
 		return "text/css", nil
 	} else if strings.HasSuffix(path, ".js") {
 		return "text/javascript", nil
+	} else if strings.HasSuffix(path, ".svg") {
+		return "image/svg+xml", nil
 	}
 	buffer := make([]byte, 512)
 	out, err := os.Open(path)
@@ -67,7 +69,7 @@ func responseFile(w http.ResponseWriter, path string, shared bool, r *http.Reque
 		log.Printf("Error while reading file at shared/%s: %s", src, err.Error())
 		return
 	}
-	log.Printf("Sending %s to %s", path, r.RemoteAddr)
+	log.Printf("Sending %s to %s as %s", path, r.RemoteAddr, mime)
 	_, err3 := io.Copy(w, file)
 	checkError(err3, r.RemoteAddr)
 	file.Close()

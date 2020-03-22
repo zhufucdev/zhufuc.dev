@@ -8,25 +8,44 @@
     <link rel="stylesheet" href="/shared/style.css">
     <script src="/shared/materialize.js"></script>
     <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/splash.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/cookies.js"></script>
 </head>
 <body>
-<nav class="navbar-fixed">
-    <div class="nav-wrapper">
-        <a class="brand-logo">zhufucdev</a>
-        <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav" href="#"><i class="material-icons">menu</i></a>
+<main>
+    <nav class="navbar-fixed">
+        <div class="nav-wrapper">
+            <a class="brand-logo">zhufucdev</a>
+            <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
+               href="#"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+    <div style="width: 100%; display: none" class="deep-orange row" id="browser-not-supported">
+        <span class="white-text col">您的浏览器似乎并不支持ECMAScript 2015或自定义标签的特性，故无法显示某些内容</span>
+        <i class="material-icons white-text col right waves-effect" onclick="$(this).parent().hide()">close</i>
     </div>
-</nav>
-<ul class="sidenav sidenav-fixed" id="main-sidenav">
-    <li><div class="user-view">
-        <div class="background blue"></div>
-        <a><img src="shared/face.png" class="circle"></a>
-        <a><span class="white-text name">zhufucdev</span> </a>
-        <a><span class="white-text email">A individual developer for Java and C#</span> </a>
-    </div> </li>
-    <li><a><i class="material-icons">build</i>项目 </a> </li>
-</ul>
+    <ul class="sidenav sidenav-fixed" id="main-sidenav">
+        <li>
+            <div class="user-view">
+                <div class="background blue"></div>
+                <a><img src="shared/face.png" class="circle"></a>
+                <a><span class="white-text name">zhufucdev</span> </a>
+                <a><span class="white-text email">A individual developer for Java and C#</span> </a>
+            </div>
+        </li>
+        <li><a><i class="material-icons">build</i>项目 </a></li>
+    </ul>
+</main>
 </body>
 <script>
+    if (!checkBrowser()) {
+        $('#browser-not-supported').show()
+    }
+    if (!docCookies.hasItem('splash') || true) {
+        document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
+        docCookies.setItem('splash', 'shown');
+    }
     M.AutoInit()
 </script>
 </html>
