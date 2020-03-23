@@ -1,4 +1,8 @@
 window.Repeater = new function () {
+    function getK(x) {
+        return (Math.cos(x * Math.PI) + 1) / 2
+    }
+
     function flyIn(ele) {
         let count = 0, times = 700 / 10;
         ele.style.display = 'block';
@@ -6,8 +10,64 @@ window.Repeater = new function () {
         let i = setInterval(() => {
             ele.style.transform = "translateY(" + 120 * (Math.cos(count / times * Math.PI) + 1) + "px)";
             if (count >= times) clearInterval(i);
-            count ++;
+            count++;
         }, 10);
+    }
+
+    function hideShowBase(ele, get, show) {
+        let count = 0, times = 300 / 10, originalHeight = (ele.originalHeight ?? ele.clientHeight), originalWidth = (ele.originalWidth ?? ele.clientWidth);
+        ele.originalHeight = originalHeight; ele.originalWidth = originalWidth;
+        let i;
+        function opacity(done) {
+            ele.style.opacity = get(0);
+            ele.style.display = 'block';
+            i = setInterval(() => {
+                ele.style.opacity = get(count / times).toString();
+                count++;
+                if (count >= times) {
+                    clearInterval(i);
+                    if (show) {
+                        ele.style.display = 'block';
+                        ele.style.opacity = null;
+                    }
+                    count = 0;
+                    if (typeof done === "function")
+                        done()
+                }
+            }, 10);
+        }
+
+        function size(done) {
+            i = setInterval(() => {
+                if (show) ele.style.display = 'block';
+                let k = get(count / times);
+                ele.style.height = originalHeight * k + "px";
+                ele.style.width = originalWidth * k + "px";
+                if (count >= times) {
+                    clearInterval(i);
+                    ele.style.height = ele.style.width = null;
+                    if (!show) ele.style.display = 'none';
+                    count = 0;
+                    if (typeof done === "function")
+                        done()
+                }
+                count++;
+            }, 10);
+        }
+
+        if (show) {
+            size(opacity)
+        } else {
+            opacity(size)
+        }
+    }
+
+    function hide(ele) {
+        hideShowBase(ele, getK, false);
+    }
+
+    function show(ele) {
+        hideShowBase(ele, x => getK(1 - x), true);
     }
 
     function Repeater(ele) {
@@ -75,7 +135,35 @@ window.Repeater = new function () {
         ele.insertAdjacentElement('beforeend', content);
 
         elementCount++;
-        return new Repeater(content);
+        let wrapper = new Repeater(content);
+
+        let lastChange;
+        input.addEventListener('input', () => {
+            let value = input.value;
+            console.log('input: ' + value);
+            if (value) {
+                lastChange = new Date().getMilliseconds();
+                setTimeout(() => {
+                    if ((new Date()).getMilliseconds() - lastChange < 290) {
+                        console.log('Giving up ' + value);
+                        return;
+                    }
+                    wrapper.elements.forEach(ele => {
+                        if (!ele.innerText.includes(value)) {
+                            if (ele.style.display !== "none")
+                                hide(ele);
+                        } else if (ele.style.display === "none")
+                            show(ele);
+                    });
+                }, 300)
+            } else {
+                wrapper.elements.forEach(ele => {
+                    if (ele.style.display === "none")
+                        show(ele);
+                })
+            }
+        });
+        return wrapper;
     };
 
     /**
