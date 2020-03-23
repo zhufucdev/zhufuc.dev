@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>zhufucdev</title>
     <link rel="stylesheet" href="/shared/materialize.css">
     <link rel="stylesheet" href="/shared/material-icons.css">
@@ -15,13 +16,15 @@
 </head>
 <body>
 <main>
-    <nav class="navbar-fixed">
-        <div class="nav-wrapper">
-            <a class="brand-logo">zhufucdev</a>
-            <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
-               href="#"><i class="material-icons">menu</i></a>
-        </div>
-    </nav>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a class="brand-logo">zhufucdev</a>
+                <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
+                   href="#"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+    </div>
     <div style="width: 100%; display: none" class="deep-orange row" id="browser-not-supported">
         <span class="white-text col">您的浏览器似乎并不支持ECMAScript 2015或自定义标签的特性，故无法显示某些内容</span>
         <i class="material-icons white-text col right waves-effect" onclick="$(this).parent().hide()">close</i>
@@ -35,7 +38,7 @@
                 <a><span class="white-text email">A individual developer for Java and C#</span> </a>
             </div>
         </li>
-        <li><a class="selected-item"><i class="material-icons">build</i>项目 </a></li>
+        <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目 </a></li>
     </ul>
     <div class="container">
         <div class="center progress-bar">
@@ -120,12 +123,15 @@
     repeater.model = `
 <div class="col s12 m6">
     <div class="card">
-    <div class="card-content">
-        <span class="card-title">$name</span>
-        <p>$subtitle</p>
-        <p>基于$lang</p>
+        <div class="card-image"><img src="/shared/project-icons/%name.png"></div>
+        <div class="card-stacked">
+            <div class="card-content">
+                <span class="card-title">%name</span>
+                <p>%subtitle</p>
+            </div>
+            <div class="card-action">%lang</div>
+        </div>
     </div>
-</div>
 </div>
     `;
     $.ajax('/shared/projects.json', {
@@ -163,8 +169,9 @@
                     }
                     return language;
                 }
+
                 let languages = "";
-                if (typeof project.lang === "string"){
+                if (typeof project.lang === "string") {
                     languages = langByCode(project.lang);
                 } else {
                     for (let i in project.lang) {

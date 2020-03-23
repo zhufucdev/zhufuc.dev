@@ -12,7 +12,7 @@ window.Repeater = new function () {
 
     function Repeater(ele) {
         this.contentElement = ele;
-        this.model = "<span>$title</span>";
+        this.model = "<span>%title</span>";
 
         let updating = false;
         this.beginUpdate = () => updating = true;
@@ -34,7 +34,7 @@ window.Repeater = new function () {
             let newEle = this.model;
             for (let arg in arguments) {
                 if (arguments.hasOwnProperty(arg)) {
-                    newEle = newEle.replace("$" + arg, arguments[arg])
+                    newEle = newEle.replace(new RegExp("%" + arg, "g"), arguments[arg])
                 }
             }
             let div = document.createElement('div');
@@ -53,8 +53,8 @@ window.Repeater = new function () {
     this.init = ele => {
         // Search bar
         let textfield = document.createElement('div');
-        textfield.setAttribute("class", "input-field right");
-        textfield.style.width = "38.2%";
+        textfield.setAttribute("class", "input-field");
+        textfield.style.width = "100%";
         let icon = document.createElement('i');
         icon.setAttribute("class", "material-icons prefix");
         icon.textContent = "search";
@@ -67,12 +67,11 @@ window.Repeater = new function () {
         let helper = document.createElement('label');
         helper.setAttribute("for", id);
         helper.textContent = "搜索";
+        helper.style.width = "120px";
         textfield.appendChild(helper);
         ele.insertAdjacentElement('afterbegin', textfield);
         // Content
         let content = document.createElement('div');
-        content.style.position = "relative";
-        content.style.top = "60px";
         ele.insertAdjacentElement('beforeend', content);
 
         elementCount++;
