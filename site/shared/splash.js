@@ -25,13 +25,17 @@ class Splash extends HTMLElement {
         let i = document.createElement('i');
         i.textContent = '网站使用Cookies以提供基础功能与改善用户体验';
         inform.appendChild(i);
+        let inform2 = document.createElement('p');
+        let i2 = document.createElement('i');
+        i2.textContent = '点击背景区域以开始';
+        inform2.appendChild(i2);
         /* Styles */
         let style = document.createElement('style');
         style.textContent = `
         .block {
             height: 100%;
             width: 100%;
-            background: linear-gradient(rgba(134, 197, 249, 0.6), rgba(33, 150, 243, 0.7));
+            background: linear-gradient(rgba(134, 197, 249, 0.6), rgba(33, 150, 243, 0.9));
             z-index: 1000;
             position: fixed;
         }
@@ -117,7 +121,7 @@ class Splash extends HTMLElement {
                 opacity: 0;
             }
             to {
-                transform: translate(-34%, -150%);
+                transform: translate(-34%, -130%);
                 opacity: 1;
             }
         }
@@ -141,6 +145,7 @@ class Splash extends HTMLElement {
         icons.appendChild(particles);
         subtitles.appendChild(welcome);
         subtitles.appendChild(inform);
+        subtitles.appendChild(inform2);
         wrapper.appendChild(icons);
         wrapper.appendChild(subtitles);
         shadow.appendChild(style);

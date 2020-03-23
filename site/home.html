@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="/shared/materialize.css">
     <link rel="stylesheet" href="/shared/material-icons.css">
     <link rel="stylesheet" href="/shared/style.css">
-    <script src="/shared/materialize.js"></script>
     <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/repeater.js"></script>
     <script src="/shared/splash.js"></script>
     <script src="/shared/utility.js"></script>
     <script src="/shared/cookies.js"></script>
@@ -34,18 +35,151 @@
                 <a><span class="white-text email">A individual developer for Java and C#</span> </a>
             </div>
         </li>
-        <li><a><i class="material-icons">build</i>项目 </a></li>
+        <li><a class="selected-item"><i class="material-icons">build</i>项目 </a></li>
     </ul>
+    <div class="container">
+        <div class="center progress-bar">
+            <div class="preloader-wrapper small active">
+                <div class="spinner-layer spinner-blue">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-yellow">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-green">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="repeater"></div>
+    </div>
 </main>
 </body>
 <script>
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
     }
-    if (!docCookies.hasItem('splash') || true) {
+    if (!docCookies.hasItem('splash')) {
         document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
         docCookies.setItem('splash', 'shown');
     }
-    M.AutoInit()
+    let progress = document.querySelector('.progress-bar');
+    let repeaterEle = document.querySelector('.repeater');
+    repeaterEle.style.opacity = '0';
+
+    function hideProgress() {
+        fadeOut(progress, () => {
+            progress.style.display = 'none';
+            fadeIn(repeaterEle)
+        });
+    }
+
+    $(document).ready(() => {
+        setTimeout(() => animateTitle("项目"), 1000);
+    });
+    let repeater = Repeater.init(repeaterEle);
+    $(repeater.contentElement).addClass('row');
+    repeater.model = `
+<div class="col s12 m6">
+    <div class="card">
+    <div class="card-content">
+        <span class="card-title">$name</span>
+        <p>$subtitle</p>
+        <p>基于$lang</p>
+    </div>
+</div>
+</div>
+    `;
+    $.ajax('/shared/projects.json', {
+        dataType: 'json',
+        success: (r) => {
+            repeater.beginUpdate();
+            r.forEach(project => {
+                function langByCode(code) {
+                    let language;
+                    switch (code) {
+                        case "kt":
+                            language = "Kotlin";
+                            break;
+                        case "js":
+                            language = "JavaScript";
+                            break;
+                        case "java":
+                            language = "Java";
+                            break;
+                        case "html":
+                            language = "HTML";
+                            break;
+                        case "css":
+                            language = "CSS";
+                            break;
+                        case "cs":
+                            language = "C#";
+                            break;
+                        default:
+                            if (typeof code === "string") {
+                                code[0] = code[0].toUpperCase();
+                                language = code;
+                            }
+                            break;
+                    }
+                    return language;
+                }
+                let languages = "";
+                if (typeof project.lang === "string"){
+                    languages = langByCode(project.lang);
+                } else {
+                    for (let i in project.lang) {
+                        let code = project.lang[i];
+                        languages += langByCode(code);
+                        if (i != project.lang.length - 1) languages += ", "
+                    }
+                }
+                project.lang = languages;
+                hideProgress();
+                repeater.push(project)
+            });
+            repeater.endUpdate();
+        }
+    });
+    M.AutoInit();
 </script>
 </html>
