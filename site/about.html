@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zhufucdev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/shared/materialize.css">
+    <link rel="stylesheet" href="/shared/material-icons.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/repeater.js"></script>
+    <script src="/shared/splash.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/cookies.js"></script>
+</head>
+<style>
+    p i {
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    p span {
+        vertical-align: middle;
+        font-size: 16px;
+        margin-right: 10px;
+    }
+
+    p img {
+        vertical-align: middle;
+        height: 24px;
+        margin-right: 16px;
+    }
+
+    .level-2 {
+        margin-left: 24px;
+    }
+
+    .family-nickname {
+        float: right;
+        font-style: italic;
+        font-size: smaller;
+    }
+</style>
+<body>
+<main>
+    <div class="navbar-fixed" style="height: 112px">
+        <nav class="nav-extended">
+            <div class="nav-wrapper">
+                <a class="brand-logo">zhufucdev</a>
+                <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
+                   href="#"><i class="material-icons">menu</i></a>
+            </div>
+            <div class="nav-content">
+                <ul class="tabs tabs-transparent" style="display: block">
+                    <li class="tab waves-effect waves-light"><a href="#basis">基本</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div style="width: 100%; display: none" class="deep-orange row" id="browser-not-supported">
+        <span class="white-text col">您的浏览器似乎并不支持ECMAScript 2015或自定义标签的特性，故无法显示某些内容</span>
+        <i class="material-icons white-text col right waves-effect" onclick="$(this).parent().hide()">close</i>
+    </div>
+    <ul class="sidenav sidenav-fixed" id="main-sidenav">
+        <li>
+            <div class="user-view">
+                <div class="background blue"></div>
+                <a><img src="shared/face.png" class="circle"></a>
+                <a><span class="white-text name">zhufucdev</span> </a>
+                <a><span class="white-text email">A individual developer for Java and C#</span> </a>
+            </div>
+        </li>
+        <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目 </a></li>
+        <li><a class="selected-item waves-effect"><i class="material-icons">error</i>关于 </a></li>
+    </ul>
+    <div class="container" style="display: none">
+        <div id="basis" class="row">
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content" style="vertical-align: middle">
+                        <p><i class="material-icons green-text">account_circle</i><span>朱拂</span></p>
+                        <p><i class="material-icons orange-text">location_on</i><span>中国 江苏省 常州市 横林镇</span></p>
+                        <p><i class="material-icons purple-text">school</i><span>江苏省横林高级中学</span></p>
+                        <p>
+                            <i class="material-icons deep-orange-text">people</i><span>家庭成员</span>
+                            <a id="btn-family-collection" href="#" style="position: absolute; right: 10px"><i
+                                    class="material-icons black-text">expand_more</i></a>
+                        </p>
+                        <div class="family-collection level-2" style="display: none">
+                            <i style="font-size: smaller">仅展示三代内直系亲属</i>
+                            <p><i class="material-icons deep-orange-text">account_circle</i><span>朱拂</span></p>
+                            <p><i class="material-icons deep-orange-text">account_circle</i><span>朱国忠</span><span
+                                    class="family-nickname">父亲</span></p>
+                            <p><i class="material-icons deep-orange-text">account_circle</i><span>刘玉莲</span><span
+                                    class="family-nickname">母亲</span></p>
+                            <p><i class="material-icons deep-orange-text">account_circle</i><span>朱焕庆</span><span
+                                    class="family-nickname">祖父</span></p>
+                            <p><i class="material-icons deep-orange-text">account_circle</i><span>吴金梅</span><span
+                                    class="family-nickname">祖母</span></p>
+                        </div>
+                        <p><i class="material-icons blue-text">phone</i><span>136 8526 2029</span></p>
+                        <p><i class="material-icons red-text">email</i><span>zhufuzhufu1@gmail.com</span></p>
+                        <p><img src="/shared/externel/QQ-logo.png"><span>1095291434</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">资源</span>
+                        <p>
+                            <i class="material-icons">desktop_mac</i><span>个人电脑</span>
+                            <a id="btn-pc-collection" href="#" style="position: absolute; right: 10px"><i
+                                    class="material-icons black-text">expand_more</i></a>
+                        </p>
+                        <div class="pc-collection level-2" style="display: none">
+                            <p><i class="material-icons">memory</i><span>Intel Core™ i7-9700k</span></p>
+                            <p><i class="material-icons">memory</i><span>Corsair 8GB×2 @ 3200MHz</span></p>
+                            <p><i class="material-icons">memory</i><span>RX580 2408sp 4GB</span></p>
+                            <p><i class="material-icons">tv</i><span>MINESU 21" 1080p & Hisense TV 1080p</span></p>
+                            <p><i class="material-icons">keyboard</i><span>HP GK100</span></p>
+                            <p><i class="material-icons">headset</i><span>Xiaomi TDSER02JY</span></p>
+                        </div>
+                        <p>
+                            <i class="material-icons">phone_android</i><span>Redmi K30 5G</span>
+                            <a id="btn-phone-collection" href="#" style="position: absolute; right: 10px"><i
+                                    class="material-icons black-text">expand_more</i></a>
+                        </p>
+                        <div class="phone-collection level-2" style="display: none">
+                            <p><i class="material-icons">memory</i><span>Snapdragon 765G</span></p>
+                            <p><i class="material-icons">memory</i><span>6GB @ LPDDR4X 2133MHz</span></p>
+                            <p><i class="material-icons">memory</i><span>Adreno™ 620</span></p>
+                            <p><i class="material-icons">tv</i><span>6.67" 2400×1080px @ 120Hz</span></p>
+                        </div>
+                        <p>
+                            <i class="material-icons">phone_iphone</i><span>iPhone 6</span>
+                            <a id="btn-iphone-collection" href="#" style="position: absolute; right: 10px"><i
+                                    class="material-icons black-text">expand_more</i></a>
+                        </p>
+                        <div class="iphone-collection level-2" style="display: none">
+                            <p><i class="material-icons">memory</i><span>Apple A9</span></p>
+                            <p><i class="material-icons">memory</i><span>1GB</span></p>
+                            <p><i class="material-icons">memory</i><span>PowerVR GX6450</span></p>
+                            <p><i class="material-icons">tv</i><span>4.7" 1334×710px</span></p>
+                        </div>
+                        <p>
+                            <i class="material-icons">watch</i><span>小米手环4</span>
+                            <a id="btn-band-collection" href="#" style="position: absolute; right: 10px"><i
+                                    class="material-icons black-text">expand_more</i></a>
+                        </p>
+                        <div class="band-collection level-2" style="display: none">
+                            <p><i class="material-icons">memory</i><span>512KB</span></p>
+                            <p><i class="material-icons">tv</i><span>0.95" 240×120 AMOLED</span></p>
+                            <p><i class="material-icons">bluetooth</i><span>BT5.0 BLE</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+<script>
+    animateTitle('关于');
+    let tabs = document.querySelector('.tabs');
+    $(document).ready(() => {
+        tabs.style.display = null;
+        let animator = new ObjectAnimator(0, tabs.clientHeight);
+        animator.addUpdateListener(v => tabs.style.height = v + "px");
+        animator.doOnEnd(() => tabs.style.height = null);
+        animator.start();
+        M.AutoInit();
+
+        let container = document.querySelector('.container');
+        for (let i = 0; i < container.children.length; i++) {
+            let item = container.children.item(i);
+            item.style.opacity = '0';
+            setTimeout(() => {
+                let animator = new ObjectAnimator(0, 1);
+                animator.duration = 300;
+                animator.addUpdateListener(v => item.style.opacity = v.toString());
+                animator.start()
+            }, i * 120)
+        }
+        container.style.display = null;
+    });
+    function expandable(btn, toBeExpanded) {
+        btn.onclick = () => {
+            let toShow = toBeExpanded.style.display === "none";
+            let animator = (toShow ? new ObjectAnimator(0, 1) : new ObjectAnimator(1, 0));
+            let collectionHeight = btn.parentElement.clientHeight * toBeExpanded.children.length;
+            if (toShow) {
+                toBeExpanded.style.height = toBeExpanded.style.opacity = '0';
+            }
+            toBeExpanded.style.display = null;
+            animator.duration = 300;
+            animator.addUpdateListener(v => {
+                btn.style.transform = "rotateX(" + 180 * v + "deg)";
+                toBeExpanded.style.height = collectionHeight * v + "px";
+                toBeExpanded.style.opacity = v.toString();
+            });
+            animator.doOnEnd(() => {
+                toBeExpanded.style.height = toBeExpanded.style.opacity = null;
+                if (!toShow) toBeExpanded.style.display = "none";
+            });
+            animator.start();
+            btn.style.transform = "rotate("
+        }
+    }
+    expandable(document.getElementById('btn-family-collection'), document.querySelector('.family-collection'));
+    expandable(document.getElementById('btn-pc-collection'), document.querySelector('.pc-collection'));
+    expandable(document.getElementById('btn-iphone-collection'), document.querySelector('.iphone-collection'));
+    expandable(document.getElementById('btn-phone-collection'), document.querySelector('.phone-collection'));
+    expandable(document.getElementById('btn-band-collection'), document.querySelector('.band-collection'));
+</script>
+</html>

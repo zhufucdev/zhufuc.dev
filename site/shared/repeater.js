@@ -148,8 +148,9 @@ window.Repeater = new function () {
                         console.log('Giving up ' + value);
                         return;
                     }
+                    value = value.toLowerCase();
                     wrapper.elements.forEach(ele => {
-                        if (!ele.innerText.includes(value)) {
+                        if (!ele.innerText.toLowerCase().includes(value)) {
                             if (ele.style.display !== "none")
                                 hide(ele);
                         } else if (ele.style.display === "none")

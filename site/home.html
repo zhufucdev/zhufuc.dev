@@ -39,6 +39,7 @@
             </div>
         </li>
         <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目 </a></li>
+        <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于 </a></li>
     </ul>
     <div class="container">
         <div class="center progress-bar">
@@ -115,9 +116,7 @@
         });
     }
 
-    $(document).ready(() => {
-        setTimeout(() => animateTitle("项目"), 1000);
-    });
+    animateTitle("项目");
     let repeater = Repeater.init(repeaterEle);
     $(repeater.contentElement).addClass('row');
     repeater.model = `
@@ -141,6 +140,11 @@
             r.forEach(project => {
                 function langByCode(code) {
                     let language;
+
+                    function getIcon() {
+                        return '<img src="/shared/project-icons/languages/' + code + '.png" height="12px"/>'
+                    }
+
                     switch (code) {
                         case "kt":
                             language = "Kotlin";
@@ -158,7 +162,7 @@
                             language = "CSS";
                             break;
                         case "cs":
-                            language = "C#";
+                            language = 'C#';
                             break;
                         default:
                             if (typeof code === "string") {
@@ -167,7 +171,7 @@
                             }
                             break;
                     }
-                    return language;
+                    return getIcon() + language;
                 }
 
                 let languages = "";

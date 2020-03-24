@@ -40,7 +40,7 @@ class Splash extends HTMLElement {
             position: fixed;
         }
         .wrapper {
-            position: absolute;
+            position: fixed;
             z-index: 1001;
             left: 50%;
             top: 50%;
@@ -53,10 +53,7 @@ class Splash extends HTMLElement {
             animation-fill-mode: forwards;
         }
         .subtitles {
-            position: relative;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, 0%);
+            transform: translateY(150%);
             opacity: 0;
             animation-name: fly-in;
             animation-delay: 2.2s;
@@ -80,8 +77,6 @@ class Splash extends HTMLElement {
             animation-fill-mode: forwards;
         }
         .particles {
-            width: 600px;
-            height: 600px;
             opacity: 0;
             transform: rotate(360deg);
             animation-delay: 1.1s;
@@ -94,7 +89,7 @@ class Splash extends HTMLElement {
                 width: 0;
             }
             to {
-                width: 200px;
+                width: 40%;
             }
         }
         @keyframes rotate-in {
@@ -117,11 +112,11 @@ class Splash extends HTMLElement {
         }
         @keyframes fly-in {
             from {
-                transform: translate(-34%, 150%);
+                transform: translateY(150%);
                 opacity: 0;
             }
             to {
-                transform: translate(-34%, -130%);
+                transform: translateY(0%);
                 opacity: 1;
             }
         }

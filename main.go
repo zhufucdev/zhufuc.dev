@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -90,7 +91,14 @@ func homepage(w http.ResponseWriter, r *http.Request) {
 }
 
 func aboutPage(w http.ResponseWriter, r *http.Request) {
+	parse, err := url.Parse(r.RequestURI)
+	if err != nil && parse != nil {
+		if len(parse.Query()) >= 0 {
 
+			return
+		}
+	}
+	responseFile(w, "about.html", false, r)
 }
 
 func main() {

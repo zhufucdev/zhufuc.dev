@@ -23,16 +23,22 @@ function checkBrowser() {
  */
 function animateTitle(title) {
     let ele = document.querySelector('.brand-logo');
-    let animator1 = new ObjectAnimator(1, 0), animator2 = new ObjectAnimator(0, 1);
-    let l = v => ele.style.opacity = v.toString();
-    animator1.addUpdateListener(l);
-    animator2.addUpdateListener(l);
-    animator1.duration = animator2.duration = 200;
-    animator1.doOnEnd(() => {
-        ele.textContent = title;
-        animator2.start()
-    });
-    animator1.start()
+    ele.style.opacity = '0';
+    let animator3 = new ObjectAnimator(0, 1);
+    animator3.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator3.start();
+    setTimeout(() => {
+        let animator1 = new ObjectAnimator(1, 0), animator2 = new ObjectAnimator(0, 1);
+        let l = v => ele.style.opacity = v.toString();
+        animator1.addUpdateListener(l);
+        animator2.addUpdateListener(l);
+        animator1.duration = animator2.duration = 200;
+        animator1.doOnEnd(() => {
+            ele.textContent = title;
+            animator2.start()
+        });
+        animator1.start()
+    }, 2000);
 }
 
 function fadeOut(ele, onEnd) {
@@ -64,6 +70,9 @@ class ObjectAnimator {
         this.addUpdateListener = l => {
             listeners.push(l)
         };
+        this.clearUpdateListeners = () => {
+            listeners = [];
+        };
         /**
          * Called when the change has finished.
          * @param l {function()}
@@ -80,7 +89,7 @@ class ObjectAnimator {
         this.start = () => {
             if (started) throw 'Animator already started.';
             let delta = this.to - this.from;
-            let times = this.duration / 20;
+            let times = this.duration / 10;
             let count = 0;
             let i = setInterval(() => {
                 function notify(value) {
@@ -96,7 +105,7 @@ class ObjectAnimator {
                     clearInterval(i);
                     if (typeof this.onEndListener === "function") this.onEndListener();
                 }
-            }, 20)
+            }, 10)
         }
     }
 }
