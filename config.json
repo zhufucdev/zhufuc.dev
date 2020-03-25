@@ -1,4 +1,5 @@
 {
   "port": 3000,
-  "admin_pwd": "qwerty"
+  "admin_pwd": "qwerty",
+  "black_most": 10
 }

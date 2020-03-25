@@ -55,6 +55,20 @@ function fadeIn(ele, onEnd) {
     animator.start();
 }
 
+function fadeSwitch(ele, newHTML) {
+    let animator = new ObjectAnimator(1, 0);
+    animator.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator.doOnEnd(() => {
+        ele.innerHTML = newHTML;
+        let animator2 = new ObjectAnimator(0, 1);
+        animator2.addUpdateListener(v => ele.style.opacity = v.toString());
+        animator2.duration = 200;
+        animator2.start();
+    });
+    animator.duration = 200;
+    animator.start()
+}
+
 class ObjectAnimator {
     /**
      * Changes a number in a specific range and direction, within a specific time.

@@ -103,7 +103,7 @@
     }
     if (!docCookies.hasItem('splash')) {
         document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
-        docCookies.setItem('splash', 'shown');
+        docCookies.setItem('splash', 'shown', new Date(new Date().getFullYear() + 10, 1));
     }
     let progress = document.querySelector('.progress-bar');
     let repeaterEle = document.querySelector('.repeater');
@@ -133,7 +133,8 @@
     </div>
 </div>
     `;
-    $.ajax('/shared/projects.json', {
+    $.ajax({
+        url: '/shared/projects.json',
         dataType: 'json',
         success: (r) => {
             repeater.beginUpdate();
@@ -181,7 +182,7 @@
                     for (let i in project.lang) {
                         let code = project.lang[i];
                         languages += langByCode(code);
-                        if (i != project.lang.length - 1) languages += ", "
+                        if (i !== project.lang.length - 1) languages += ", "
                     }
                 }
                 project.lang = languages;

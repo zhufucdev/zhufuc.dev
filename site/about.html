@@ -10,7 +10,6 @@
     <script src="/shared/jquery-3.4.1.js"></script>
     <script src="/shared/materialize.js"></script>
     <script src="/shared/repeater.js"></script>
-    <script src="/shared/splash.js"></script>
     <script src="/shared/utility.js"></script>
     <script src="/shared/cookies.js"></script>
 </head>
@@ -157,6 +156,17 @@
                     </div>
                 </div>
             </div>
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">体貌</span>
+                        <p><i class="material-icons blue-text">accessibility</i><span id="height">身高</span></p>
+                        <div style="margin-left: 34px; font-size: 16px">
+                            <p id="weight">体重</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -164,6 +174,18 @@
 <script>
     animateTitle('关于');
     let tabs = document.querySelector('.tabs');
+    $.ajax({
+        url: '/about?request=get&what=constants',
+        dataType: 'json',
+        success: function (r) {
+            let height = document.getElementById('height'), weight = document.getElementById('weight');
+            setTimeout(() => {
+                fadeSwitch(height, r.height[0] + r.height[1]);
+                fadeSwitch(weight, r.weight[0] + r.weight[1])
+            }, 300)
+        }
+    });
+
     $(document).ready(() => {
         tabs.style.display = null;
         let animator = new ObjectAnimator(0, tabs.clientHeight);
@@ -172,19 +194,22 @@
         animator.start();
         M.AutoInit();
 
-        let container = document.querySelector('.container');
-        for (let i = 0; i < container.children.length; i++) {
-            let item = container.children.item(i);
-            item.style.opacity = '0';
-            setTimeout(() => {
-                let animator = new ObjectAnimator(0, 1);
-                animator.duration = 300;
-                animator.addUpdateListener(v => item.style.opacity = v.toString());
-                animator.start()
-            }, i * 120)
-        }
-        container.style.display = null;
+        let basis = document.querySelector('#basis');
+        setTimeout(() => {
+            for (let i = 0; i < basis.children.length; i++) {
+                let item = basis.children.item(i);
+                item.style.opacity = '0';
+                setTimeout(() => {
+                    let animator = new ObjectAnimator(0, 1);
+                    animator.duration = 300;
+                    animator.addUpdateListener(v => item.style.opacity = v.toString());
+                    animator.start()
+                }, i * 120)
+            }
+            document.querySelector('.container').style.display = null;
+        }, 500);
     });
+
     function expandable(btn, toBeExpanded) {
         btn.onclick = () => {
             let toShow = toBeExpanded.style.display === "none";
@@ -208,6 +233,7 @@
             btn.style.transform = "rotate("
         }
     }
+
     expandable(document.getElementById('btn-family-collection'), document.querySelector('.family-collection'));
     expandable(document.getElementById('btn-pc-collection'), document.querySelector('.pc-collection'));
     expandable(document.getElementById('btn-iphone-collection'), document.querySelector('.iphone-collection'));

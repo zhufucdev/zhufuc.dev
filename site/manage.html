@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zhufucdev.manage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/shared/materialize.css">
+    <link rel="stylesheet" href="/shared/material-icons.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/repeater.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/cookies.js"></script>
+</head>
+<style>
+    body {
+        background-size: cover;
+        background: linear-gradient(45deg, #00b0ff, #0D47A1) no-repeat fixed;
+    }
+</style>
+<body>
+<div class="container white-text login">
+    <h1>确保您是zhufucdev</h1>
+    <div class="input-field">
+        <input type="password" id="pwd-input">
+        <label for="pwd-input">密码</label>
+    </div>
+    <a class="btn waves-effect waves-light right" id="btn-next">下一步</a>
+</div>
+<div class="control-panel row"
+     style="display: none; position: absolute; top: 20px; left: 20px; right: 20px;width: 100%;">
+    <div class="col s12 m6">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">常量</span>
+                <div class="row">
+                    <div class="input-field col s10">
+                        <input type="number" id="height-input">
+                        <label for="height-input">身高</label>
+                    </div>
+                    <div class="input-field col s2">
+                        <input type="text" id="height-unit-input">
+                        <label for="height-unit-input">单位</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s10">
+                        <input type="number" id="weight-input">
+                        <label for="height-input">体重</label>
+                    </div>
+                    <div class="input-field col s2">
+                        <input type="text" id="weight-unit-input">
+                        <label for="height-unit-input">单位</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    let login = document.querySelector('.login'), cp = document.querySelector('.control-panel');
+
+    function initControlPanel() {
+        let heightInput = document.getElementById('height-input'),
+            heightUnitInput = document.getElementById('height-unit-input');
+        let weightInput = document.getElementById('weight-input'),
+            weightUnitInput = document.getElementById('weight-unit-input');
+        let localConstants;
+        function listenChanges() {
+            function sync(what, content) {
+                $.ajax({
+                    url: '/manage?request=set&what=' + what,
+                    data: JSON.stringify(content),
+                    method: 'POST',
+                    error: function (e) {
+                        M.toast({'html': '无法将' + what + '改为' + content + ': ' + e.status});
+                        if (e.status === 403) {
+                            showLogin();
+                        }
+                    }
+                })
+            }
+            function generateValueInput(name) {
+                return function (event) {
+                    let value = parseFloat(event.target.value);
+                    let v = [value, localConstants[name][1]];
+                    localConstants[name] = v;
+                    sync(name, v);
+                }
+            }
+            function generateUnitInput(name) {
+                return function (event) {
+                    let value = event.target.value;
+                    let v = [localConstants[name][0], value];
+                    localConstants[name] = v;
+                    sync(name, v);
+                }
+            }
+            heightInput.onchange = generateValueInput('height');
+            weightInput.onchange = generateValueInput('weight');
+            heightUnitInput.onchange = generateUnitInput('height');
+            weightUnitInput.onchange = generateUnitInput('weight');
+        }
+        // Constants
+        $.ajax({
+            url: '/about?request=get&what=constants',
+            dataType: 'json',
+            success: function (r) {
+                localConstants = r;
+                heightInput.value = r.height[0];
+                heightUnitInput.value = r.height[1];
+                weightInput.value = r.weight[0];
+                weightUnitInput.value = r.weight[1];
+
+                M.updateTextFields();
+                listenChanges();
+            },
+            error: function (r) {
+                M.toast({html: "无法获得常量：" + r.status});
+                listenChanges();
+            }
+        })
+    }
+
+    function initLoginPanel() {
+        $('#btn-next').click(() => {
+            $.ajax({
+                url: '/manage?request=validate',
+                method: 'POST',
+                dataType: 'json',
+                data: $('#pwd-input').val(),
+                success: function (r) {
+                    if (r.result === 1) {
+                        M.toast({'html': '密码错误'});
+                        return
+                    }
+                    showControlPanel()
+                },
+                error: function () {
+                    M.toast({'html': '服务器未返还有效信息'})
+                }
+            })
+        })
+    }
+
+    function showControlPanel() {
+        let width = window.innerWidth;
+        let animator = new ObjectAnimator(width, 0);
+
+        function translateCP(x) {
+            cp.style.transform = "translateX(" + x + "px)"
+        }
+
+        translateCP(width);
+        cp.style.display = null;
+        animator.addUpdateListener(v => {
+            login.style.transform = "translateX(" + (v - width) + "px)";
+            translateCP(v);
+        });
+        animator.doOnEnd(() => {
+            login.style.display = 'none';
+            initControlPanel()
+        });
+        animator.start();
+    }
+
+    function showLogin() {
+        let width = window.innerWidth;
+        let animator = new ObjectAnimator(width, 0);
+
+        function translateLogin(x) {
+            login.style.transform = "translateX(" + x + "px)"
+        }
+
+        translateLogin(width);
+        login.style.display = null;
+        animator.addUpdateListener(v => {
+            cp.style.transform = "translateX(" + (v - width) + "px)";
+            translateLogin(v);
+        });
+        animator.doOnEnd(() => {
+            cp.style.display = 'none';
+            initLoginPanel()
+        });
+        animator.start();
+    }
+
+    M.AutoInit();
+
+    if (docCookies.hasItem("passport")) {
+        cp.style.display = null;
+        login.style.display = 'none';
+        initControlPanel();
+    } else {
+        initLoginPanel();
+    }
+</script>
+</html>
