@@ -3,24 +3,28 @@
     "name": "MCRE",
     "subtitle": "Minecraft Java版和基岩版的资源包编辑器在Android平台的实现",
     "lang": "kt",
-    "status": 1
+    "status": 1,
+    "category": "程序"
   },
   {
     "name": "OpenCraft",
     "subtitle": "开源的Minecraft Java版服务器",
     "lang": ["kt","java","js","html","css"],
-    "status": 2
+    "status": 2,
+    "category": "程序"
   },
   {
     "name": "PCtoPE",
     "subtitle": "Minecraft Java版资源包到基岩版的转化器在Android平台的实现",
     "lang": "kt",
-    "status": 0
+    "status": 0,
+    "category": "程序"
   },
   {
     "name": "ScoreManager",
     "subtitle": "小组制学校计分解决方案在WinForm平台的实现",
     "lang": "cs",
-    "status": 0
+    "status": 0,
+    "category": "程序"
   }
 ]

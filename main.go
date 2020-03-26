@@ -224,18 +224,25 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 				jsonMap[what] = contents
 				// Write
 
-				file, err = os.OpenFile(constantsPath, os.O_WRONLY, 0644)
+				file, err = os.Create(constantsPath)
 				if !check(err) {
 					return
 				}
-				encoder := json.NewEncoder(file)
+				buff := new(bytes.Buffer)
+				encoder := json.NewEncoder(buff)
 				err = encoder.Encode(jsonMap)
-				_ = file.Sync()
 				if err != nil {
 					log.Printf("[manage] Failed to write changes from remote: %s", err)
 					w.WriteHeader(417)
 				} else {
-					w.WriteHeader(200)
+					defer file.Close()
+					_, err = file.Write(buff.Bytes())
+					if err != nil {
+						log.Printf("[manage] Failed to write changes to disk: %s", err)
+						w.WriteHeader(417)
+					} else {
+						w.WriteHeader(200)
+					}
 				}
 			}
 			return

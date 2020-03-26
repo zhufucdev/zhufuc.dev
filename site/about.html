@@ -52,7 +52,8 @@
             </div>
             <div class="nav-content">
                 <ul class="tabs tabs-transparent" style="display: block">
-                    <li class="tab waves-effect waves-light"><a href="#basis">基本</a></li>
+                    <li class="tab"><a href="#basis">基本</a></li>
+                    <li class="tab"><a href="#ability">能力</a></li>
                 </ul>
             </div>
         </nav>
@@ -100,7 +101,7 @@
                         </div>
                         <p><i class="material-icons blue-text">phone</i><span>136 8526 2029</span></p>
                         <p><i class="material-icons red-text">email</i><span>zhufuzhufu1@gmail.com</span></p>
-                        <p><img src="/shared/externel/QQ-logo.png"><span>1095291434</span></p>
+                        <p><img src="/shared/external/QQ-logo.png"><span>1095291434</span></p>
                     </div>
                 </div>
             </div>
@@ -168,31 +169,22 @@
                 </div>
             </div>
         </div>
+        <div id="ability" class="row">
+
+        </div>
     </div>
 </main>
 </body>
 <script>
     animateTitle('关于');
     let tabs = document.querySelector('.tabs');
-    $.ajax({
-        url: '/about?request=get&what=constants',
-        dataType: 'json',
-        success: function (r) {
-            let height = document.getElementById('height'), weight = document.getElementById('weight');
-            setTimeout(() => {
-                fadeSwitch(height, r.height[0] + r.height[1]);
-                fadeSwitch(weight, r.weight[0] + r.weight[1])
-            }, 300)
-        }
-    });
-
     $(document).ready(() => {
         tabs.style.display = null;
+        M.AutoInit();
         let animator = new ObjectAnimator(0, tabs.clientHeight);
         animator.addUpdateListener(v => tabs.style.height = v + "px");
         animator.doOnEnd(() => tabs.style.height = null);
         animator.start();
-        M.AutoInit();
 
         let basis = document.querySelector('#basis');
         setTimeout(() => {
@@ -239,5 +231,53 @@
     expandable(document.getElementById('btn-iphone-collection'), document.querySelector('.iphone-collection'));
     expandable(document.getElementById('btn-phone-collection'), document.querySelector('.phone-collection'));
     expandable(document.getElementById('btn-band-collection'), document.querySelector('.band-collection'));
+    /* Abilities */
+    let ability = Repeater.init(document.getElementById('ability'));
+    ability.model = `
+<div style="display: flex" class="col s12 m6">
+    <div style="align-self: flex-start; height: 40px; width: auto; margin: 5px">
+        %icon
+    </div>
+    <div style="margin-left: 10px">
+        <p>%name</p>
+        <p>%description</p>
+    </div>
+</div>
+        `;
+
+    function getArgs(data) {
+        return {
+            "name": data.name,
+            "description": data.description,
+            "icon": data.icon.from === "src" ? '<img height="100%" src="' + data.icon.name + '"/>'
+                : '<i class="material-icons">' + data.icon.name + '</i>'
+        }
+    }
+
+    /* Download extra data */
+    function useConstants(data) {
+        let height = document.getElementById('height'), weight = document.getElementById('weight');
+        setTimeout(() => {
+            fadeSwitch(height, data.height[0] + data.height[1]);
+            fadeSwitch(weight, data.weight[0] + data.weight[1]);
+        }, 300);
+        let abilityData = data["ability"];
+        for (let category in abilityData) {
+            if (abilityData.hasOwnProperty(category)) {
+                let ab = abilityData[category];
+                for (let i in ab) {
+                    if (ab.hasOwnProperty(i) && typeof ab[i] === "object") {
+                        ability.push(getArgs(ab[i]), category, true)
+                    }
+                }
+            }
+        }
+    }
+
+    $.ajax({
+        url: '/about?request=get&what=constants',
+        dataType: 'json',
+        success: useConstants
+    });
 </script>
 </html>

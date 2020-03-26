@@ -47,15 +47,58 @@
                 <div class="row">
                     <div class="input-field col s10">
                         <input type="number" id="weight-input">
-                        <label for="height-input">体重</label>
+                        <label for="weight-input">体重</label>
                     </div>
                     <div class="input-field col s2">
                         <input type="text" id="weight-unit-input">
-                        <label for="height-unit-input">单位</label>
+                        <label for="weight-unit-input">单位</label>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">能力</span>
+                <div id="ability"></div>
+                <a class="btn-floating btn-large right" id="btn-add-ability"><i class="material-icons">add</i> </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h4>编辑能力数据</h4>
+        <div class="input-field">
+            <input id="ability-name-input" type="text">
+            <label for="ability-name-input">名称</label>
+        </div>
+        <div class="input-field">
+            <input id="ability-description-input" type="text">
+            <label for="ability-description-input">简介</label>
+        </div>
+        <div class="input-field">
+            <input id="ability-category-input" type="text">
+            <label for="ability-category-input">分类</label>
+        </div>
+        <div class="input-field">
+            <select class="no-autoinit">
+                <option value="mdi">Material Design Icons</option>
+                <option value="src">图片</option>
+            </select>
+            <label>图标类型</label>
+        </div>
+        <div class="row">
+            <div class="col s2" id="ability-icon-preview">
+            </div>
+            <div class="input-field col s10">
+                <input id="ability-icon-input" type="text">
+                <label for="ability-icon-input">图标名</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect btn-flat modal-close left" id="modal-delete">删除</a>
+        <a class="waves-effect btn-flat modal-close" id="modal-confirm">确定</a>
     </div>
 </div>
 </body>
@@ -67,52 +110,195 @@
             heightUnitInput = document.getElementById('height-unit-input');
         let weightInput = document.getElementById('weight-input'),
             weightUnitInput = document.getElementById('weight-unit-input');
+        let ability = Repeater.init(document.getElementById('ability'));
+        ability.model = `
+<div style="display: flex" class="waves-effect">
+    <div style="align-self: flex-start; height: 40px; width: auto; margin: 5px">
+        %icon
+    </div>
+    <div style="margin-left: 10px">
+        <p>%name</p>
+        <p>%description</p>
+    </div>
+</div>
+        `;
         let localConstants;
-        function listenChanges() {
-            function sync(what, content) {
-                $.ajax({
-                    url: '/manage?request=set&what=' + what,
-                    data: JSON.stringify(content),
-                    method: 'POST',
-                    error: function (e) {
-                        M.toast({'html': '无法将' + what + '改为' + content + ': ' + e.status});
-                        if (e.status === 403) {
-                            showLogin();
+
+        function syncToRemote(what, content) {
+            $.ajax({
+                url: '/manage?request=set&what=' + what,
+                data: JSON.stringify(content),
+                method: 'POST',
+                error: function (e) {
+                    M.toast({'html': '无法更改' + what + ': ' + e.status});
+                    if (e.status === 403) {
+                        showLogin();
+                    }
+                }
+            })
+        }
+
+        function syncAbilitiesLocally() {
+            let t = localConstants;
+            ability.beginUpdate();
+            let abilityData = t["ability"];
+            let modal = M.Modal.getInstance(document.querySelector('.modal'));
+
+            function modalFor(data, category) {
+                function getIcon() {
+                    return data.icon.from === "src" ? '<img height="100%" src="' + data.icon.name + '"/>'
+                        : '<i class="material-icons">' + data.icon.name + '</i>'
+                }
+
+                function getArgs() {
+                    return {
+                        "name": data.name,
+                        "description": data.description,
+                        "icon": getIcon()
+                    }
+                }
+
+                let nameInput = document.getElementById('ability-name-input'),
+                    descriptionInput = document.getElementById('ability-description-input'),
+                    categoryInput = document.getElementById('ability-category-input'),
+                    iconNameInput = document.getElementById('ability-icon-input'),
+                    iconTypeSelect = document.querySelector('select');
+                let iconPreview = document.getElementById('ability-icon-preview');
+                let confirm = document.getElementById('modal-confirm'),
+                    del = document.getElementById('modal-delete');
+
+                let isNewItem = data === undefined;
+
+                function autoSync() {
+                    iconNameInput.onchange = () => {
+                        data.icon.name = iconNameInput.value;
+                        iconPreview.innerHTML = getIcon();
+                    };
+                    iconTypeSelect.onchange = () => {
+                        data.icon.from = iconTypeSelect.value;
+                    };
+                }
+
+                if (!isNewItem) {
+                    let newEle = ability.push(getArgs(), category, false);
+                    console.log(newEle);
+                    let index = ability.indexInCategoryOf(newEle);
+                    newEle.addEventListener('click', function () {
+                        iconPreview.innerHTML = getIcon();
+                        nameInput.value = data.name;
+                        descriptionInput.value = data.description;
+                        categoryInput.value = category;
+                        iconNameInput.value = data.icon.name;
+                        iconTypeSelect.value = data.icon.from;
+                        M.updateTextFields();
+                        M.FormSelect.init(iconTypeSelect);
+
+                        autoSync();
+
+                        confirm.onclick = () => {
+                            data.name = nameInput.value;
+                            data.description = descriptionInput.value;
+                            category = categoryInput.value;
+
+                            localConstants["ability"][category][index] = data;
+                            ability.update(newEle, getArgs());
+                            syncToRemote('ability', localConstants['ability'])
+                        };
+                        del.onclick = () => {
+                            ability.remove(newEle);
+                            localConstants['ability'][category].splice(index, 1);
+                            syncToRemote('ability', localConstants['ability']);
+                        };
+
+                        modal.open();
+                    })
+                } else {
+                    data = {
+                        name: '',
+                        description: '',
+                        icon: {
+                            from: 'mdi',
+                            name: ''
+                        }
+                    };
+                    [iconNameInput, nameInput, descriptionInput, categoryInput].forEach(it => it.value = null);
+                    M.FormSelect.init(iconTypeSelect);
+                    autoSync();
+                    confirm.onclick = () => {
+                        data.name = nameInput.value;
+                        data.description = descriptionInput.value;
+                        category = categoryInput.value;
+                        if (localConstants["ability"][category] === undefined)
+                            localConstants["ability"][category] = [];
+                        localConstants["ability"][category].push(data);
+                        modalFor(data, category);
+                        syncToRemote('ability', localConstants['ability'])
+                    };
+
+                    modal.open();
+                }
+            }
+
+            for (let category in abilityData) {
+                if (abilityData.hasOwnProperty(category)) {
+                    let abilities = abilityData[category];
+                    for (let i in abilities) {
+                        if (abilities.hasOwnProperty(i)) {
+                            let ab = abilities[i];
+                            if (typeof ab === "object")
+                                modalFor(ab, category, i)
                         }
                     }
-                })
+                }
             }
+            ability.endUpdate();
+
+            let btnAdd = document.getElementById('btn-add-ability');
+            btnAdd.onclick = () => modalFor(undefined, undefined, -1)
+        }
+
+        function syncInputsLocally() {
+            let t = localConstants;
+            heightInput.value = t.height[0];
+            heightUnitInput.value = t.height[1];
+            weightInput.value = t.weight[0];
+            weightUnitInput.value = t.weight[1];
+            ability.clear();
+            syncAbilitiesLocally();
+        }
+
+        // Constants
+        function listenChanges() {
             function generateValueInput(name) {
                 return function (event) {
                     let value = parseFloat(event.target.value);
                     let v = [value, localConstants[name][1]];
                     localConstants[name] = v;
-                    sync(name, v);
+                    syncToRemote(name, v);
                 }
             }
+
             function generateUnitInput(name) {
                 return function (event) {
                     let value = event.target.value;
                     let v = [localConstants[name][0], value];
                     localConstants[name] = v;
-                    sync(name, v);
+                    syncToRemote(name, v);
                 }
             }
+
             heightInput.onchange = generateValueInput('height');
             weightInput.onchange = generateValueInput('weight');
             heightUnitInput.onchange = generateUnitInput('height');
             weightUnitInput.onchange = generateUnitInput('weight');
         }
-        // Constants
+
         $.ajax({
             url: '/about?request=get&what=constants',
             dataType: 'json',
             success: function (r) {
                 localConstants = r;
-                heightInput.value = r.height[0];
-                heightUnitInput.value = r.height[1];
-                weightInput.value = r.weight[0];
-                weightUnitInput.value = r.weight[1];
+                syncInputsLocally();
 
                 M.updateTextFields();
                 listenChanges();

@@ -4,20 +4,28 @@ window.Repeater = new function () {
     }
 
     function flyIn(ele) {
+        if (ele.originalDisplay === undefined) ele.originalDisplay = ele.style.display;
         let count = 0, times = 700 / 10;
         ele.style.display = 'block';
         ele.style.transform = 'translateY(240px)';
         let i = setInterval(() => {
             ele.style.transform = "translateY(" + 120 * (Math.cos(count / times * Math.PI) + 1) + "px)";
-            if (count >= times) clearInterval(i);
+            if (count >= times) {
+                clearInterval(i);
+                ele.style.display = ele.originalDisplay;
+                ele.style.transform = null;
+            }
             count++;
         }, 10);
     }
 
     function hideShowBase(ele, get, show) {
-        let count = 0, times = 300 / 10, originalHeight = (ele.originalHeight ?? ele.clientHeight), originalWidth = (ele.originalWidth ?? ele.clientWidth);
-        ele.originalHeight = originalHeight; ele.originalWidth = originalWidth;
+        let count = 0, times = 300 / 10, originalHeight = (ele.originalHeight ?? ele.clientHeight),
+            originalWidth = (ele.originalWidth ?? ele.clientWidth);
+        ele.originalHeight = originalHeight;
+        ele.originalWidth = originalWidth;
         let i;
+
         function opacity(done) {
             ele.style.opacity = get(0);
             ele.style.display = 'block';
@@ -75,37 +83,107 @@ window.Repeater = new function () {
         this.model = "<span>%title</span>";
 
         let updating = false;
+        this.clear = () => {
+            for (let i in ele.children) {
+                if (ele.children.hasOwnProperty(i))
+                    ele.children[i].remove()
+            }
+            this.elements = [];
+        };
         this.beginUpdate = () => updating = true;
         this.endUpdate = () => {
             for (let i = 0; i < this.elements.length; i++) {
                 let element = this.elements[i];
-                let timeout = i * 100;
-                if (timeout === 0) flyIn(element);
-                else setTimeout(() => flyIn(element), timeout)
+                if (!element.doAnimate) {
+                    element.style.display = element.originalDisplay;
+                } else {
+                    let timeout = i * 100;
+                    if (timeout === 0) flyIn(element);
+                    else setTimeout(() => flyIn(element), timeout)
+                }
             }
             updating = false;
         };
         this.elements = [];
+        this.categories = {};
+        let addCategory = (name) => {
+            if (!this.categories.hasOwnProperty(name)) {
+                let categoryDiv = document.createElement('div');
+                let span = document.createElement('p');
+                span.setAttribute('class', 'red-text');
+                span.textContent = name;
+                categoryDiv.appendChild(span);
+                ele.insertAdjacentElement('beforeend', categoryDiv);
+                this.categories[name] = categoryDiv;
+            }
+            return this.categories[name];
+        };
+        this.indexInCategoryOf = (ele) => {
+            let category = ele.category;
+            if (typeof category === "string") {
+                let search = this.categories[category].children;
+                for (let i in search) {
+                    if (search.hasOwnProperty(i) && ele === search[i]) {
+                        return i - 1;
+                    }
+                }
+                return -1
+            } else {
+                throw 'Element does not have a category.'
+            }
+        };
         /**
          * Pushes a new item according to the model.
          * @param arguments {Object}
+         * @param category {string|undefined} Text to classify this element.
+         * @param animate {boolean|undefined} Whether to animate this element.
+         * @return Element
          */
-        this.push = (arguments) => {
+        this.push = (arguments, category, animate) => {
             let newEle = this.model;
             for (let arg in arguments) {
                 if (arguments.hasOwnProperty(arg)) {
                     newEle = newEle.replace(new RegExp("%" + arg, "g"), arguments[arg])
                 }
             }
-            let div = document.createElement('div');
-            div.innerHTML = newEle.trim();
-            newEle = div.firstElementChild;
-            ele.insertAdjacentElement('beforeend', newEle);
+            let virtual = document.createElement('div');
+            virtual.innerHTML = newEle.trim();
+            newEle = virtual.firstElementChild;
+            if (category) {
+                newEle.category = category;
+                let categoryEle = addCategory(category);
+                categoryEle.appendChild(newEle);
+            } else {
+                ele.insertAdjacentElement('beforeend', newEle);
+            }
             this.elements.push(newEle);
 
-            if (!updating) flyIn(newEle);
-            else newEle.style.display = 'none';
-        }
+            if (!updating) {
+                if (animate !== false)
+                    flyIn(newEle);
+            }
+            else {
+                newEle.originalDisplay = newEle.style.display;
+                newEle.style.display = 'none';
+                newEle.doAnimate = animate !== false;
+            }
+            return newEle;
+        };
+
+        this.update = (ele, arguments) => {
+            let newText = this.model;
+            for (let arg in arguments) {
+                if (arguments.hasOwnProperty(arg)) {
+                    newText = newText.replace(new RegExp("%" + arg, "g"), arguments[arg])
+                }
+            }
+            ele.innerHTML = newText;
+        };
+
+        this.remove = (ele) => {
+            hide(ele);
+            ele.remove();
+        };
     }
 
     let elementCount = 0;
