@@ -54,6 +54,7 @@
                 <ul class="tabs tabs-transparent" style="display: block">
                     <li class="tab"><a href="#basis">基本</a></li>
                     <li class="tab"><a href="#ability">能力</a></li>
+                    <li class="tab"><a href="#events">经历</a></li>
                 </ul>
             </div>
         </nav>
@@ -108,7 +109,10 @@
             <div class="col s12 m6">
                 <div class="card">
                     <div class="card-content">
-                        <span class="card-title">资源</span>
+                        <span class="card-title">
+                            资源
+                            <a class="waves-effect right black-text" id="resources-help"><i class="material-icons">help</i></a>
+                        </span>
                         <p>
                             <i class="material-icons">desktop_mac</i><span>个人电脑</span>
                             <a id="btn-pc-collection" href="#" style="position: absolute; right: 10px"><i
@@ -164,17 +168,27 @@
                         <p><i class="material-icons blue-text">accessibility</i><span id="height">身高</span></p>
                         <div style="margin-left: 34px; font-size: 16px">
                             <p id="weight">体重</p>
+                            <p>戴眼镜</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="ability" class="row">
-
+        <div id="ability" class="row no-search-bar">
+            <a class="waves-effect right black-text" id="ability-help"><i class="material-icons">help</i> </a>
         </div>
+        <div id="events"></div>
     </div>
 </main>
-</body>
+<div class="modal" id="modal-helper">
+    <div class="modal-content">
+        <h4>帮助</h4>
+        <p id="modal-helper-content"></p>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect btn-flat modal-close">确定</a>
+    </div>
+</div>
 <script>
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
@@ -248,14 +262,31 @@
 </div>
         `;
 
-    function getArgs(data) {
+    function getAbilityArgs(data) {
         return {
             "name": data.name,
             "description": data.description,
             "icon": data.icon.from === "src" ? '<img height="100%" src="' + data.icon.name + '"/>'
-                : '<i class="material-icons">' + data.icon.name + '</i>'
+                : '<i class="material-icons" style="font-size: 40px">' + data.icon.name + '</i>'
         }
     }
+
+    function getEventArgs(data) {
+        return {
+            icon: typeof data.icon === "string" ? data.icon : 'event',
+            content: data.content
+        }
+    }
+
+    /* Events */
+    let events = Repeat.init(document.getElementById('events'));
+    events.model = `
+<div style="margin: 10px">
+    <i class="material-icons circle red white-text circle-mdi">%icon</i>
+    <span style="vertical-align: middle">%content</span>
+</div>
+    `;
+    events.categoryDivStyle = "display: flex; flex-wrap: wrap";
 
     /* Download extra data */
     function useConstants(data) {
@@ -270,7 +301,22 @@
                 let ab = abilityData[category];
                 for (let i in ab) {
                     if (ab.hasOwnProperty(i) && typeof ab[i] === "object") {
-                        ability.push(getArgs(ab[i]), category, true)
+                        ability.push(getAbilityArgs(ab[i]), category, true)
+                    }
+                }
+            }
+        }
+        let eventsDataUnsorted = data["events"];
+        let eventsData = {};
+        Object.keys(eventsDataUnsorted).sort().forEach(key => {
+            eventsData[key] = eventsDataUnsorted[key];
+        });
+        for (let year in eventsData) {
+            if (eventsData.hasOwnProperty(year)) {
+                let eventsInYear = eventsData[year];
+                for (let i in eventsInYear) {
+                    if (eventsInYear.hasOwnProperty(i) && typeof eventsInYear[i] === "object") {
+                        events.push(getEventArgs(eventsInYear[i]), year, false)
                     }
                 }
             }
@@ -282,5 +328,19 @@
         dataType: 'json',
         success: useConstants
     });
+    /* Helper */
+    let textEle = document.getElementById('modal-helper-content');
+
+    function attachHelperTo(id, content) {
+        let ele = document.getElementById(id);
+        ele.addEventListener('click', () => {
+            textEle.textContent = content;
+            $('#modal-helper').modal('open');
+        })
+    }
+
+    attachHelperTo('ability-help', '此处仅罗列正常人在十岁后自然学习所不能获得的能力。包括但不仅限。');
+    attachHelperTo('resources-help', '二级菜单中的项目仅代表产品的一部分特性，便于快速了解。')
 </script>
+</body>
 </html>

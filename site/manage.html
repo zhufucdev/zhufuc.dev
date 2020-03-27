@@ -18,6 +18,7 @@
         background-size: cover;
         background: linear-gradient(45deg, #00b0ff, #0D47A1) no-repeat fixed;
     }
+
 </style>
 <body>
 <div class="container white-text login">
@@ -29,7 +30,7 @@
     <a class="btn waves-effect waves-light right" id="btn-next">下一步</a>
 </div>
 <div class="control-panel row"
-     style="display: none; position: absolute; top: 20px; left: 20px; right: 20px;width: 100%;">
+     style="display: none; position: absolute; top: 20px;width: 100%;">
     <div class="col s12 m6">
         <div class="card">
             <div class="card-content">
@@ -58,14 +59,25 @@
         </div>
         <div class="card">
             <div class="card-content">
+                <span class="card-title">经历</span>
+                <div id="events"></div>
+                <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-event"><i
+                        class="material-icons">add</i> </a>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m6">
+        <div class="card">
+            <div class="card-content">
                 <span class="card-title">能力</span>
-                <div id="ability"></div>
-                <a class="btn-floating btn-large right" id="btn-add-ability"><i class="material-icons">add</i> </a>
+                <div id="ability" class="no-search-bar"></div>
+                <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-ability"><i
+                        class="material-icons">add</i> </a>
             </div>
         </div>
     </div>
 </div>
-<div class="modal modal-fixed-footer">
+<div class="modal modal-fixed-footer" id="ability-edit">
     <div class="modal-content">
         <h4>编辑能力数据</h4>
         <div class="input-field">
@@ -97,8 +109,33 @@
         </div>
     </div>
     <div class="modal-footer">
-        <a class="waves-effect btn-flat modal-close left" id="modal-delete">删除</a>
-        <a class="waves-effect btn-flat modal-close" id="modal-confirm">确定</a>
+        <a class="waves-effect btn-flat modal-close left" id="ability-modal-delete">删除</a>
+        <a class="waves-effect btn-flat modal-close" id="ability-modal-confirm">确定</a>
+    </div>
+</div>
+<div class="modal modal-fixed-footer" id="event-edit">
+    <div class="modal-content">
+        <h4>编辑事件数据</h4>
+        <div class="input-field">
+            <input id="event-content-input" type="text">
+            <label for="event-content-input">内容</label>
+        </div>
+        <div class="input-field">
+            <input id="event-year-input" type="number">
+            <label for="event-year-input">年份</label>
+        </div>
+        <div class="row">
+            <i class="col s12 m1 material-icons" id="event-icon-preview">
+            </i>
+            <div class="input-field col s12 m11" style="margin: auto">
+                <input id="event-icon-input" type="text">
+                <label for="event-icon-input">图标名</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect btn-flat modal-close left" id="event-modal-delete">删除</a>
+        <a class="waves-effect btn-flat modal-close" id="event-modal-confirm">确定</a>
     </div>
 </div>
 </body>
@@ -122,6 +159,13 @@
     </div>
 </div>
         `;
+        let events = Repeat.init(document.getElementById('events'));
+        events.model = `
+<div class="waves-effect" style="margin: 10px">
+    <i class="material-icons circle red white-text circle-mdi">%icon</i>
+    <span style="vertical-align: middle">%content</span>
+</div>
+    `;
         let localConstants;
 
         function syncToRemote(what, content) {
@@ -140,13 +184,22 @@
 
         function syncAbilitiesLocally() {
             let t = localConstants;
+            ability.clear();
             ability.beginUpdate();
             let abilityData = t["ability"];
-            let modal = M.Modal.getInstance(document.querySelector('.modal'));
+            let modal = M.Modal.getInstance(document.querySelector('#ability-edit'));
+            let nameInput = document.getElementById('ability-name-input'),
+                descriptionInput = document.getElementById('ability-description-input'),
+                categoryInput = document.getElementById('ability-category-input'),
+                iconNameInput = document.getElementById('ability-icon-input'),
+                iconTypeSelect = document.querySelector('select');
+            let iconPreview = document.getElementById('ability-icon-preview');
+            let confirm = document.getElementById('ability-modal-confirm'),
+                del = document.getElementById('ability-modal-delete');
 
             function modalFor(data, category) {
                 function getIcon() {
-                    return data.icon.from === "src" ? '<img height="100%" src="' + data.icon.name + '"/>'
+                    return data.icon.from === "src" ? '<img height="40px" src="' + data.icon.name + '"/>'
                         : '<i class="material-icons">' + data.icon.name + '</i>'
                 }
 
@@ -157,15 +210,6 @@
                         "icon": getIcon()
                     }
                 }
-
-                let nameInput = document.getElementById('ability-name-input'),
-                    descriptionInput = document.getElementById('ability-description-input'),
-                    categoryInput = document.getElementById('ability-category-input'),
-                    iconNameInput = document.getElementById('ability-icon-input'),
-                    iconTypeSelect = document.querySelector('select');
-                let iconPreview = document.getElementById('ability-icon-preview');
-                let confirm = document.getElementById('modal-confirm'),
-                    del = document.getElementById('modal-delete');
 
                 let isNewItem = data === undefined;
 
@@ -181,7 +225,6 @@
 
                 if (!isNewItem) {
                     let newEle = ability.push(getArgs(), category, false);
-                    console.log(newEle);
                     let index = ability.indexInCategoryOf(newEle);
                     newEle.addEventListener('click', function () {
                         iconPreview.innerHTML = getIcon();
@@ -258,14 +301,119 @@
             btnAdd.onclick = () => modalFor(undefined, undefined, -1)
         }
 
+        function syncEventsLocally() {
+            let contentInput = document.getElementById('event-content-input'),
+                yearInput = document.getElementById('event-year-input'),
+                iconNameInput = document.getElementById('event-icon-input');
+            let iconPreview = document.getElementById('event-icon-preview');
+            let confirm = document.getElementById('event-modal-confirm'),
+                del = document.getElementById('event-modal-delete');
+            let modal = M.Modal.getInstance(document.getElementById('event-edit'));
+
+            function modalFor(data, year) {
+                function getIcon() {
+                    return typeof data.icon === "string" ? data.icon : 'event';
+                }
+
+                function getIconName() {
+                    return iconNameInput.value !== "event" ? (iconNameInput.value === "" ? "event" : iconNameInput.value) : undefined;
+                }
+
+                function preview() {
+                    data.icon = getIconName();
+                    iconPreview.textContent = getIcon();
+                }
+
+                function getArgs() {
+                    return {
+                        icon: getIcon(),
+                        content: data.content
+                    }
+                }
+
+                let newItem = typeof data === "undefined";
+                if (!newItem) {
+                    let newEle = events.push(getArgs(), year, false);
+                    let oldYear = year;
+                    newEle.addEventListener('click', () => {
+                        contentInput.value = data.content;
+                        iconNameInput.value = typeof data.icon === "string" ? data.icon : "event";
+                        preview();
+                        M.updateTextFields();
+                        if (year !== undefined) {
+                            yearInput.value = year;
+                        }
+                        iconNameInput.onchange = preview;
+                        let index = events.indexInCategoryOf(newEle);
+                        confirm.onclick = () => {
+                            data.content = contentInput.value;
+                            year = yearInput.value.toString();
+                            if (year !== oldYear) {
+                                console.log('oldYear = ' + oldYear + ', year = ' + year + ', index = ' + index);
+                                localConstants['events'][oldYear].splice(index, 1);
+                                events.remove(newEle);
+                                modalFor(data, year);
+                                if (typeof localConstants['events'][year] === "undefined") {
+                                    localConstants['events'][year] = [];
+                                }
+                                localConstants['events'][year].push(data);
+                            } else {
+                                console.log(index);
+                                localConstants['events'][year][index] = data;
+                                events.update(newEle, getArgs());
+                            }
+                            syncToRemote('events', localConstants['events']);
+                        };
+                        del.onclick = () => {
+                            localConstants['events'][oldYear].splice(index, 1);
+                            syncToRemote('events', localConstants['events'])
+                        };
+                        modal.open();
+                    });
+                } else {
+                    iconNameInput.value = contentInput.value = yearInput.value = null;
+                    data = {
+                        content: ''
+                    };
+                    preview();
+                    iconNameInput.onchange = preview;
+                    confirm.onclick = () => {
+                        year = yearInput.value;
+                        data.content = contentInput.value;
+                        if (typeof localConstants['events'][year] === "undefined")
+                            localConstants['events'][year] = [];
+                        localConstants['events'][year].push(data);
+                        syncToRemote('events', localConstants['events']);
+                        modalFor(data, year);
+                    };
+                    modal.open();
+                }
+            }
+
+            events.clear();
+            events.beginUpdate();
+            let eventData = localConstants["events"];
+            for (let year in eventData) {
+                if (eventData.hasOwnProperty(year)) {
+                    let eventsInYear = eventData[year];
+                    if (Array.isArray(eventsInYear)) {
+                        eventsInYear.forEach(event => modalFor(event, year));
+                    }
+                }
+            }
+            events.endUpdate();
+            let btnAdd = document.getElementById('btn-add-event');
+            btnAdd.onclick = () => modalFor();
+        }
+
         function syncInputsLocally() {
             let t = localConstants;
             heightInput.value = t.height[0];
             heightUnitInput.value = t.height[1];
             weightInput.value = t.weight[0];
             weightUnitInput.value = t.weight[1];
-            ability.clear();
             syncAbilitiesLocally();
+            syncEventsLocally();
         }
 
         // Constants

@@ -1,4 +1,5 @@
 let Repeat = {};
+
 function getK(x) {
     return (Math.cos(x * Math.PI) + 1) / 2
 }
@@ -86,6 +87,7 @@ function hide(ele) {
 function show(ele) {
     hideShowBase(ele, x => getK(1 - x), true);
 }
+
 class Repeater {
     constructor(ele) {
         this.contentElement = ele;
@@ -115,13 +117,16 @@ class Repeater {
         };
         this.elements = [];
         this.categories = {};
+        this.categoryDivStyle = undefined;
         let addCategory = (name) => {
             if (!this.categories.hasOwnProperty(name)) {
                 let categoryDiv = document.createElement('div');
+                if (typeof this.categoryDivStyle === "string")
+                    categoryDiv.setAttribute('style', this.categoryDivStyle);
                 let span = document.createElement('p');
                 span.setAttribute('class', 'red-text');
                 span.textContent = name;
-                categoryDiv.appendChild(span);
+                ele.insertAdjacentElement('beforeend', span);
                 ele.insertAdjacentElement('beforeend', categoryDiv);
                 this.categories[name] = categoryDiv;
             }
@@ -133,7 +138,7 @@ class Repeater {
                 let search = this.categories[category].children;
                 for (let i in search) {
                     if (search.hasOwnProperty(i) && ele === search[i]) {
-                        return i - 1;
+                        return i;
                     }
                 }
                 return -1
@@ -198,58 +203,62 @@ class Repeater {
 let elementCount = 0;
 Repeat.init = ele => {
     // Search bar
-    let textfield = document.createElement('div');
-    textfield.setAttribute("class", "input-field");
-    textfield.style.width = "100%";
-    let icon = document.createElement('i');
-    icon.setAttribute("class", "material-icons prefix");
-    icon.textContent = "search";
-    textfield.appendChild(icon);
-    let input = document.createElement('input'), id = "search-input" + (elementCount > 0 ? "-" + elementCount : "");
-    input.setAttribute("class", "validate");
-    input.setAttribute("id", id);
-    input.setAttribute("type", "text");
-    textfield.appendChild(input);
-    let helper = document.createElement('label');
-    helper.setAttribute("for", id);
-    helper.textContent = "搜索";
-    helper.style.width = "120px";
-    textfield.appendChild(helper);
-    ele.insertAdjacentElement('afterbegin', textfield);
+    let clazz = ele.getAttribute('class');
+    if (clazz === null || !clazz.split(' ').includes('no-search-bar')) {
+        let textfield = document.createElement('div');
+        textfield.setAttribute("class", "input-field");
+        textfield.style.width = "100%";
+        let icon = document.createElement('i');
+        icon.setAttribute("class", "material-icons prefix");
+        icon.textContent = "search";
+        textfield.appendChild(icon);
+        let input = document.createElement('input'), id = "search-input" + (elementCount > 0 ? "-" + elementCount : "");
+        input.setAttribute("class", "validate");
+        input.setAttribute("id", id);
+        input.setAttribute("type", "text");
+        textfield.appendChild(input);
+        let helper = document.createElement('label');
+        helper.setAttribute("for", id);
+        helper.textContent = "搜索";
+        helper.style.width = "120px";
+        textfield.appendChild(helper);
+        ele.insertAdjacentElement('afterbegin', textfield);
+
+        let lastChange;
+        input.addEventListener('input', () => {
+            let value = input.value;
+            console.log('input: ' + value);
+            if (value) {
+                lastChange = new Date().getMilliseconds();
+                setTimeout(() => {
+                    if ((new Date()).getMilliseconds() - lastChange < 290) {
+                        console.log('Giving up ' + value);
+                        return;
+                    }
+                    value = value.toLowerCase();
+                    wrapper.elements.forEach(ele => {
+                        if (!ele.innerText.toLowerCase().includes(value)) {
+                            if (ele.style.display !== "none")
+                                hide(ele);
+                        } else if (ele.style.display === "none")
+                            show(ele);
+                    });
+                }, 300)
+            } else {
+                wrapper.elements.forEach(ele => {
+                    if (ele.style.display === "none")
+                        show(ele);
+                })
+            }
+        });
+    }
     // Content
     let content = document.createElement('div');
+
     ele.insertAdjacentElement('beforeend', content);
-
     elementCount++;
-    let wrapper = new Repeater(content);
 
-    let lastChange;
-    input.addEventListener('input', () => {
-        let value = input.value;
-        console.log('input: ' + value);
-        if (value) {
-            lastChange = new Date().getMilliseconds();
-            setTimeout(() => {
-                if ((new Date()).getMilliseconds() - lastChange < 290) {
-                    console.log('Giving up ' + value);
-                    return;
-                }
-                value = value.toLowerCase();
-                wrapper.elements.forEach(ele => {
-                    if (!ele.innerText.toLowerCase().includes(value)) {
-                        if (ele.style.display !== "none")
-                            hide(ele);
-                    } else if (ele.style.display === "none")
-                        show(ele);
-                });
-            }, 300)
-        } else {
-            wrapper.elements.forEach(ele => {
-                if (ele.style.display === "none")
-                    show(ele);
-            })
-        }
-    });
+    let wrapper = new Repeater(content);
     return wrapper;
 };
 /**
