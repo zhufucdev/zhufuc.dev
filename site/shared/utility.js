@@ -18,57 +18,6 @@ function checkBrowser() {
     }
 }
 
-/**
- * @param title {string} The title to fade to.
- */
-function animateTitle(title) {
-    let ele = document.querySelector('.brand-logo');
-    ele.style.opacity = '0';
-    let animator3 = new ObjectAnimator(0, 1);
-    animator3.addUpdateListener(v => ele.style.opacity = v.toString());
-    animator3.start();
-    setTimeout(() => {
-        let animator1 = new ObjectAnimator(1, 0), animator2 = new ObjectAnimator(0, 1);
-        let l = v => ele.style.opacity = v.toString();
-        animator1.addUpdateListener(l);
-        animator2.addUpdateListener(l);
-        animator1.duration = animator2.duration = 200;
-        animator1.doOnEnd(() => {
-            ele.textContent = title;
-            animator2.start()
-        });
-        animator1.start()
-    }, 2000);
-}
-
-function fadeOut(ele, onEnd) {
-    let animator = new ObjectAnimator(1, 0);
-    animator.addUpdateListener(v => ele.style.opacity = v.toString());
-    animator.doOnEnd(onEnd);
-    animator.start();
-}
-
-function fadeIn(ele, onEnd) {
-    let animator = new ObjectAnimator(0, 1);
-    animator.addUpdateListener(v => ele.style.opacity = v.toString());
-    animator.doOnEnd(onEnd);
-    animator.start();
-}
-
-function fadeSwitch(ele, newHTML) {
-    let animator = new ObjectAnimator(1, 0);
-    animator.addUpdateListener(v => ele.style.opacity = v.toString());
-    animator.doOnEnd(() => {
-        ele.innerHTML = newHTML;
-        let animator2 = new ObjectAnimator(0, 1);
-        animator2.addUpdateListener(v => ele.style.opacity = v.toString());
-        animator2.duration = 200;
-        animator2.start();
-    });
-    animator.duration = 200;
-    animator.start()
-}
-
 class ObjectAnimator {
     /**
      * Changes a number in a specific range and direction, within a specific time.
@@ -122,4 +71,56 @@ class ObjectAnimator {
             }, 10)
         }
     }
+}
+
+/**
+ * @param title {string} The title to fade to.
+ */
+function animateTitle(title) {
+    let ele = document.querySelector('.brand-logo');
+    ele.style.opacity = '0';
+    let animator3 = new ObjectAnimator(0, 1);
+    animator3.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator3.start();
+    setTimeout(() => {
+        let animator1 = new ObjectAnimator(1, 0), animator2 = new ObjectAnimator(0, 1);
+        let l = v => ele.style.opacity = v.toString();
+        animator1.addUpdateListener(l);
+        animator2.addUpdateListener(l);
+        animator1.duration = animator2.duration = 200;
+        animator1.doOnEnd(() => {
+            ele.textContent = title;
+            animator2.start()
+        });
+        animator1.start()
+    }, 2000);
+}
+
+function fadeOut(ele, onEnd) {
+    let animator = new ObjectAnimator(1, 0);
+    animator.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator.doOnEnd(onEnd);
+    animator.start();
+}
+
+function fadeIn(ele, onEnd) {
+    let animator = new ObjectAnimator(0, 1);
+    if (ele.style.display === 'none') ele.style.display = null;
+    animator.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator.doOnEnd(onEnd);
+    animator.start();
+}
+
+function fadeSwitch(ele, newHTML) {
+    let animator = new ObjectAnimator(1, 0);
+    animator.addUpdateListener(v => ele.style.opacity = v.toString());
+    animator.doOnEnd(() => {
+        ele.innerHTML = newHTML;
+        let animator2 = new ObjectAnimator(0, 1);
+        animator2.addUpdateListener(v => ele.style.opacity = v.toString());
+        animator2.duration = 200;
+        animator2.start();
+    });
+    animator.duration = 200;
+    animator.start()
 }

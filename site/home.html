@@ -38,8 +38,8 @@
                 <a><span class="white-text email">A individual developer for Java and C#</span> </a>
             </div>
         </li>
-        <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目 </a></li>
-        <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于 </a></li>
+        <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目</a></li>
+        <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于</a></li>
     </ul>
     <div class="container">
         <div class="center progress-bar">
@@ -93,6 +93,10 @@
                 </div>
             </div>
         </div>
+        <div class="center red-text" style="display: none" id="error-display">
+            <i class="material-icons big">error</i>
+            <h4>发生了一些错误</h4>
+        </div>
         <div class="repeater"></div>
     </div>
 </main>
@@ -101,25 +105,42 @@
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
     }
-    if (!docCookies.hasItem('splash')) {
+    if (typeof docCookies === "object" && !docCookies.hasItem('splash')) {
         document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
         docCookies.setItem('splash', 'shown', new Date(new Date().getFullYear() + 10, 1));
     }
     let progress = document.querySelector('.progress-bar');
     let repeaterEle = document.querySelector('.repeater');
-    repeaterEle.style.opacity = '0';
+    let errorDis = document.querySelector('#error-display');
 
     function hideProgress() {
+        repeaterEle.style.opacity = '0';
         fadeOut(progress, () => {
             progress.style.display = 'none';
             fadeIn(repeaterEle)
         });
     }
 
+    function showError(err) {
+        function insert() {
+            errorDis.insertAdjacentHTML('beforeend', '<p>' + err + '</p>');
+        }
+
+        if (errorDis.style.display === 'none')
+            fadeOut(progress, () => {
+                progress.style.display = 'none';
+                insert();
+                fadeIn(errorDis)
+            });
+        else
+            insert();
+    }
     animateTitle("项目");
-    let repeater = Repeater.init(repeaterEle);
-    $(repeater.contentElement).addClass('row');
-    repeater.model = `
+    let repeater;
+    try {
+        repeater = Repeat.init(repeaterEle);
+        $(repeater.contentElement).addClass('row');
+        repeater.model = `
 <div class="col s12 m6">
     <div class="card">
         <div class="card-image"><img src="/shared/project-icons/%name.png"></div>
@@ -133,65 +154,80 @@
     </div>
 </div>
     `;
+    } catch (e) {
+        showError('无法初始化Repeater: ' + e)
+    }
+
     $.ajax({
         url: '/shared/projects.json',
         dataType: 'json',
         success: (r) => {
-            repeater.beginUpdate();
-            r.forEach(project => {
-                function langByCode(code) {
-                    let language;
+            try {
+                repeater.beginUpdate();
+                r.forEach(project => {
+                    function langByCode(code) {
+                        let language;
 
-                    function getIcon() {
-                        return '<img src="/shared/project-icons/languages/' + code + '.png" height="12px"/>'
+                        function getIcon() {
+                            return '<img src="/shared/project-icons/languages/' + code + '.png" height="12px"/>'
+                        }
+
+                        switch (code) {
+                            case "kt":
+                                language = "Kotlin";
+                                break;
+                            case "js":
+                                language = "JavaScript";
+                                break;
+                            case "java":
+                                language = "Java";
+                                break;
+                            case "html":
+                                language = "HTML";
+                                break;
+                            case "css":
+                                language = "CSS";
+                                break;
+                            case "cs":
+                                language = 'C#';
+                                break;
+                            default:
+                                if (typeof code === "string") {
+                                    code[0] = code[0].toUpperCase();
+                                    language = code;
+                                }
+                                break;
+                        }
+                        return getIcon() + language;
                     }
 
-                    switch (code) {
-                        case "kt":
-                            language = "Kotlin";
-                            break;
-                        case "js":
-                            language = "JavaScript";
-                            break;
-                        case "java":
-                            language = "Java";
-                            break;
-                        case "html":
-                            language = "HTML";
-                            break;
-                        case "css":
-                            language = "CSS";
-                            break;
-                        case "cs":
-                            language = 'C#';
-                            break;
-                        default:
-                            if (typeof code === "string") {
-                                code[0] = code[0].toUpperCase();
-                                language = code;
-                            }
-                            break;
+                    let languages = "";
+                    if (typeof project.lang === "string") {
+                        languages = langByCode(project.lang);
+                    } else {
+                        for (let i in project.lang) {
+                            let code = project.lang[i];
+                            languages += langByCode(code);
+                            if (i !== project.lang.length - 1) languages += ", "
+                        }
                     }
-                    return getIcon() + language;
-                }
-
-                let languages = "";
-                if (typeof project.lang === "string") {
-                    languages = langByCode(project.lang);
-                } else {
-                    for (let i in project.lang) {
-                        let code = project.lang[i];
-                        languages += langByCode(code);
-                        if (i !== project.lang.length - 1) languages += ", "
-                    }
-                }
-                project.lang = languages;
-                hideProgress();
-                repeater.push(project, project.category);
-            });
-            repeater.endUpdate();
+                    project.lang = languages;
+                    hideProgress();
+                    repeater.push(project, project.category);
+                });
+                repeater.endUpdate();
+            } catch (e) {
+                showError('无法加载数据：' + e)
+            }
+        },
+        error: function (e) {
+            showError('服务器返回了无效数据: ' + e.status)
         }
     });
-    M.AutoInit();
+    try {
+        M.AutoInit();
+    } catch (e) {
+        showError('无法初始化UI组件：' + e)
+    }
 </script>
 </html>

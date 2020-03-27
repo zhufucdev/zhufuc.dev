@@ -110,7 +110,7 @@
             heightUnitInput = document.getElementById('height-unit-input');
         let weightInput = document.getElementById('weight-input'),
             weightUnitInput = document.getElementById('weight-unit-input');
-        let ability = Repeater.init(document.getElementById('ability'));
+        let ability = Repeat.init(document.getElementById('ability'));
         ability.model = `
 <div style="display: flex" class="waves-effect">
     <div style="align-self: flex-start; height: 40px; width: auto; margin: 5px">
@@ -222,6 +222,7 @@
                         }
                     };
                     [iconNameInput, nameInput, descriptionInput, categoryInput].forEach(it => it.value = null);
+                    iconTypeSelect.value = 'mdi';
                     M.FormSelect.init(iconTypeSelect);
                     autoSync();
                     confirm.onclick = () => {

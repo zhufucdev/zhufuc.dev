@@ -176,6 +176,9 @@
 </main>
 </body>
 <script>
+    if (!checkBrowser()) {
+        $('#browser-not-supported').show()
+    }
     animateTitle('关于');
     let tabs = document.querySelector('.tabs');
     $(document).ready(() => {
@@ -232,14 +235,14 @@
     expandable(document.getElementById('btn-phone-collection'), document.querySelector('.phone-collection'));
     expandable(document.getElementById('btn-band-collection'), document.querySelector('.band-collection'));
     /* Abilities */
-    let ability = Repeater.init(document.getElementById('ability'));
+    let ability = Repeat.init(document.getElementById('ability'));
     ability.model = `
 <div style="display: flex" class="col s12 m6">
     <div style="align-self: flex-start; height: 40px; width: auto; margin: 5px">
         %icon
     </div>
     <div style="margin-left: 10px">
-        <p>%name</p>
+        <h5 style="margin: auto">%name</h5>
         <p>%description</p>
     </div>
 </div>
