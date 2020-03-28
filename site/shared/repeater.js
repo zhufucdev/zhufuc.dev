@@ -95,11 +95,7 @@ class Repeater {
 
         let updating = false;
         this.clear = () => {
-            for (let i in ele.children) {
-                if (ele.children.hasOwnProperty(i))
-                    ele.children[i].remove()
-            }
-            this.elements = [];
+            ele.innerHTML = "";
         };
         this.beginUpdate = () => updating = true;
         this.endUpdate = () => {
@@ -117,12 +113,12 @@ class Repeater {
         };
         this.elements = [];
         this.categories = {};
-        this.categoryDivStyle = undefined;
+        this.categoryBuilder = undefined;
         let addCategory = (name) => {
             if (!this.categories.hasOwnProperty(name)) {
                 let categoryDiv = document.createElement('div');
-                if (typeof this.categoryDivStyle === "string")
-                    categoryDiv.setAttribute('style', this.categoryDivStyle);
+                if (typeof this.categoryBuilder === "function")
+                    this.categoryBuilder(categoryDiv);
                 let span = document.createElement('p');
                 span.setAttribute('class', 'red-text');
                 span.textContent = name;
@@ -228,11 +224,10 @@ Repeat.init = ele => {
         input.addEventListener('input', () => {
             let value = input.value;
             console.log('input: ' + value);
+            lastChange = new Date().getMilliseconds();
             if (value) {
-                lastChange = new Date().getMilliseconds();
                 setTimeout(() => {
                     if ((new Date()).getMilliseconds() - lastChange < 290) {
-                        console.log('Giving up ' + value);
                         return;
                     }
                     value = value.toLowerCase();

@@ -251,6 +251,10 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 	responseFile(w, "manage.html", false, r)
 }
 
+func settingsPage(w http.ResponseWriter, r *http.Request) {
+	responseFile(w, "settings.html", false, r)
+}
+
 var profile Profile
 
 func main() {
@@ -271,6 +275,7 @@ func main() {
 		http.HandleFunc("/", homepage)
 		http.HandleFunc("/about", aboutPage)
 		http.HandleFunc("/manage", managePage)
+		http.HandleFunc("/settings", settingsPage)
 		log.Fatal(http.ListenAndServe(":"+strconv.FormatInt(int64(profile.Port), 10), nil))
 	}
 

@@ -12,7 +12,7 @@
     <script src="/shared/repeater.js"></script>
     <script src="/shared/splash.js"></script>
     <script src="/shared/utility.js"></script>
-    <script src="/shared/cookies.js"></script>
+    <script src="/shared/settings.js"></script>
 </head>
 <body>
 <main>
@@ -35,11 +35,12 @@
                 <div class="background blue"></div>
                 <a><img src="shared/face.png" class="circle"></a>
                 <a><span class="white-text name">zhufucdev</span> </a>
-                <a><span class="white-text email">A individual developer for Java and C#</span> </a>
+                <a><span class="white-text email">An individual developer for Java and C#</span> </a>
             </div>
         </li>
         <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目</a></li>
         <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于</a></li>
+        <li><a class="waves-effect" href="settings"><i class="material-icons">settings</i>设置</a></li>
     </ul>
     <div class="container">
         <div class="center progress-bar">
@@ -105,9 +106,10 @@
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
     }
-    if (typeof docCookies === "object" && !docCookies.hasItem('splash')) {
+    let splashPreference = Settings.createPreference('splash', false);
+    if (!splashPreference.value) {
         document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
-        docCookies.setItem('splash', 'shown', new Date(new Date().getFullYear() + 10, 1));
+        splashPreference.value = true;
     }
     let progress = document.querySelector('.progress-bar');
     let repeaterEle = document.querySelector('.repeater');

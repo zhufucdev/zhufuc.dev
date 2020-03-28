@@ -366,6 +366,7 @@
                         };
                         del.onclick = () => {
                             localConstants['events'][oldYear].splice(index, 1);
+                            events.remove(newEle);
                             syncToRemote('events', localConstants['events'])
                         };
                         modal.open();

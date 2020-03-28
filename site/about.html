@@ -11,7 +11,7 @@
     <script src="/shared/materialize.js"></script>
     <script src="/shared/repeater.js"></script>
     <script src="/shared/utility.js"></script>
-    <script src="/shared/cookies.js"></script>
+    <script src="/shared/settings.js"></script>
 </head>
 <style>
     p i {
@@ -51,10 +51,11 @@
                    href="#"><i class="material-icons">menu</i></a>
             </div>
             <div class="nav-content">
-                <ul class="tabs tabs-transparent" style="display: block">
+                <ul class="tabs tabs-transparent" style="display: none">
                     <li class="tab"><a href="#basis">基本</a></li>
                     <li class="tab"><a href="#ability">能力</a></li>
                     <li class="tab"><a href="#events">经历</a></li>
+                    <li class="tab" id="experiment-tab" style="display: none"><a href="#experiment">实验性</a></li>
                 </ul>
             </div>
         </nav>
@@ -69,11 +70,12 @@
                 <div class="background blue"></div>
                 <a><img src="shared/face.png" class="circle"></a>
                 <a><span class="white-text name">zhufucdev</span> </a>
-                <a><span class="white-text email">A individual developer for Java and C#</span> </a>
+                <a><span class="white-text email">An individual developer for Java and C#</span> </a>
             </div>
         </li>
-        <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目 </a></li>
-        <li><a class="selected-item waves-effect"><i class="material-icons">error</i>关于 </a></li>
+        <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目</a></li>
+        <li><a class="selected-item waves-effect"><i class="material-icons">error</i>关于</a></li>
+        <li><a class="waves-effect" href="settings"><i class="material-icons">settings</i>设置</a></li>
     </ul>
     <div class="container" style="display: none">
         <div id="basis" class="row">
@@ -111,7 +113,8 @@
                     <div class="card-content">
                         <span class="card-title">
                             资源
-                            <a class="waves-effect right black-text" id="resources-help"><i class="material-icons">help</i></a>
+                            <a class="waves-effect right black-text" id="resources-help"><i
+                                    class="material-icons">help</i></a>
                         </span>
                         <p>
                             <i class="material-icons">desktop_mac</i><span>个人电脑</span>
@@ -177,7 +180,20 @@
         <div id="ability" class="row no-search-bar">
             <a class="waves-effect right black-text" id="ability-help"><i class="material-icons">help</i> </a>
         </div>
-        <div id="events"></div>
+        <div id="events">
+            <a class="waves-effect right black-text" id="events-help"><i class="material-icons">help</i> </a>
+        </div>
+        <div id="experiment">
+            <p class="orange-text">zhufucdev不能保证其中的信息绝对客观真实。</p>
+            <div class="card">
+                <div class="card-content" style="display: flex">
+                    <div class="waves-effect" id="iq-help">
+                        <i class="material-icons blue white-text circle-mdi circle">assistant</i>
+                        <span>智商: 142</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 <div class="modal" id="modal-helper">
@@ -194,8 +210,8 @@
         $('#browser-not-supported').show()
     }
     animateTitle('关于');
-    let tabs = document.querySelector('.tabs');
     $(document).ready(() => {
+        let tabs = document.querySelector('.tabs');
         tabs.style.display = null;
         M.AutoInit();
         let animator = new ObjectAnimator(0, tabs.clientHeight);
@@ -286,7 +302,10 @@
     <span style="vertical-align: middle">%content</span>
 </div>
     `;
-    events.categoryDivStyle = "display: flex; flex-wrap: wrap";
+    events.categoryBuilder = (div) => {
+        div.setAttribute('style', 'display: flex; flex-wrap: wrap');
+        div.setAttribute('class', 'card card-content')
+    };
 
     /* Download extra data */
     function useConstants(data) {
@@ -334,13 +353,25 @@
     function attachHelperTo(id, content) {
         let ele = document.getElementById(id);
         ele.addEventListener('click', () => {
-            textEle.textContent = content;
+            textEle.innerHTML = content;
             $('#modal-helper').modal('open');
         })
     }
 
     attachHelperTo('ability-help', '此处仅罗列正常人在十岁后自然学习所不能获得的能力。包括但不仅限。');
-    attachHelperTo('resources-help', '二级菜单中的项目仅代表产品的一部分特性，便于快速了解。')
+    attachHelperTo('resources-help', '二级菜单中的项目仅代表产品的一部分特性，以便快速了解。');
+    attachHelperTo('events-help', `
+<h5>是什么</h5>
+展示有关zhufucdev的持续时长超过三天且对后来有影响的事件。包括但不仅限。
+<h5>怎么看</h5>
+从左往右、从上往下表示事件之间的相对时间从古至今。
+    `);
+    attachHelperTo('iq-help', '根据<a href="https://baike.baidu.com/item/%E6%96%AF%E5%9D%A6%E7%A6%8F-%E6%AF%94%E5%A5%88%E6%99%BA%E5%95%86%E6%B5%8B%E9%AA%8C/1768055?fr=aladdin">斯坦福-比奈测验</a>。');
+    /* Experiment Feature */
+    if (Settings.getPreference('experiment-feature').value) {
+        let expTab = document.getElementById('experiment-tab');
+        expTab.style.display = null;
+    }
 </script>
 </body>
 </html>

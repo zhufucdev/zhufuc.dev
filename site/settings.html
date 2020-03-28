@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zhufucdev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/shared/materialize.css">
+    <link rel="stylesheet" href="/shared/material-icons.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/repeater.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/settings.js"></script>
+</head>
+<style>
+    .collection-item p {
+        max-width: 80%;
+    }
+    .control {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+    }
+</style>
+<body>
+<main>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a class="brand-logo">zhufucdev</a>
+                <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
+                   href="#"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+    </div>
+    <div style="width: 100%; display: none" class="deep-orange row" id="browser-not-supported">
+        <span class="white-text col">您的浏览器似乎并不支持ECMAScript 2015或自定义标签的特性，故无法显示某些内容</span>
+        <i class="material-icons white-text col right waves-effect" onclick="$(this).parent().hide()">close</i>
+    </div>
+    <div class="container">
+        <p class="red-text">主页</p>
+        <ul class="collection">
+            <li class="collection-item avatar">
+                <i class="material-icons circle">card_giftcard</i>
+                <span class="title">不显示欢迎动画</span>
+                <p>不在主页播放欢迎动画</p>
+                <p>每次播放后自动开启</p>
+                <div class="switch control" data-target="splash">
+                    <label>
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                    </label>
+                </div>
+            </li>
+        </ul>
+        <p class="red-text">关于页面</p>
+        <ul class="collection">
+            <li class="collection-item avatar">
+                <i class="material-icons circle">query_builder</i>
+                <span class="title">启用实验特性</span>
+                <p>zhufucdev不能保证其中的信息绝对客观真实</p>
+                <p>可能在未来有所删改</p>
+                <div class="switch control" data-target="experiment-feature">
+                    <label>
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+</main>
+<ul class="sidenav sidenav-fixed" id="main-sidenav">
+    <li>
+        <div class="user-view">
+            <div class="background blue"></div>
+            <a><img src="shared/face.png" class="circle"></a>
+            <a><span class="white-text name">zhufucdev</span> </a>
+            <a><span class="white-text email">An individual developer for Java and C#</span> </a>
+        </div>
+    </li>
+    <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目</a></li>
+    <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于</a></li>
+    <li><a class="selected-item waves-effect"><i class="material-icons">settings</i>设置</a> </li>
+</ul>
+</body>
+<script>
+    animateTitle('设置');
+    M.AutoInit();
+    Settings.autoInit();
+</script>
+</html>
