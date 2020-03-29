@@ -16,9 +16,12 @@ import (
 )
 
 type Profile struct {
-	Port      int    `json:"port"`
-	AdminPwd  string `json:"admin_pwd"`
-	BlackMost int    `json:"black_most"`
+	Port       int    `json:"port"`
+	AdminPwd   string `json:"admin_pwd"`
+	BlackMost  int    `json:"black_most"`
+	HttpsPort  int    `json:"https_port"`
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
 }
 
 type AttachedTo struct {
@@ -336,13 +339,18 @@ func main() {
 	startServer := func() {
 		blacklist = make(map[string]int)
 		registeredManager = make(map[uuid.UUID]time.Time)
-		log.Println("Listen on port", profile.Port)
 		log.Println("Admin password is", profile.AdminPwd)
 		http.HandleFunc("/", homepage)
 		http.HandleFunc("/about", aboutPage)
 		http.HandleFunc("/manage", managePage)
 		http.HandleFunc("/settings", settingsPage)
-		log.Fatal(http.ListenAndServe(":"+strconv.FormatInt(int64(profile.Port), 10), nil))
+		if profile.HttpsPort != -1 {
+			log.Println("HTTPS listen on port", profile.HttpsPort)
+			log.Fatal(http.ListenAndServeTLS(":"+strconv.FormatInt(int64(profile.HttpsPort), 10), profile.PublicKey, profile.PrivateKey, nil))
+		} else {
+			log.Println("Listen on port", profile.Port)
+			log.Fatal(http.ListenAndServe(":"+strconv.FormatInt(int64(profile.Port), 10), nil))
+		}
 	}
 
 	// Parse JSON
