@@ -21,6 +21,13 @@ type Profile struct {
 	BlackMost int    `json:"black_most"`
 }
 
+type AttachedTo struct {
+	Name   string `json:"name"`
+	Number string `json:"number"`
+	Period string `json:"period"`
+	Speak  string `json:"speak"`
+}
+
 const profilePath string = "config.json"
 const constantsPath string = "site/shared/constants.json"
 
@@ -80,7 +87,7 @@ func responseFile(w http.ResponseWriter, path string, shared bool, r *http.Reque
 	log.Printf("Sending %s to %s as %s", path, r.RemoteAddr, mime)
 	_, err3 := io.Copy(w, file)
 	checkError(err3, r.RemoteAddr)
-	file.Close()
+	_ = file.Close()
 }
 
 func homepage(w http.ResponseWriter, r *http.Request) {
@@ -101,12 +108,71 @@ func aboutPage(w http.ResponseWriter, r *http.Request) {
 	parse, err := url.Parse(r.RequestURI)
 	if err == nil && parse != nil {
 		if len(parse.Query()) > 0 {
+			getCandidates := func() ([]AttachedTo, error) {
+				var candidates []AttachedTo
+				file, err := os.Open("site/attachedTo.json")
+				if err != nil {
+					return nil, err
+				}
+				decoder := json.NewDecoder(file)
+				err = decoder.Decode(&candidates)
+				_ = file.Close()
+				return candidates, err
+			}
 			switch parse.Query().Get("request") {
 			case "get":
 				switch parse.Query().Get("what") {
 				case "constants":
 					responseFile(w, strings.TrimPrefix(constantsPath, "site/"), false, r)
 				}
+			case "guessAttachedTo":
+				buff := new(bytes.Buffer)
+				_, err := buff.ReadFrom(r.Body)
+				if !checkError(err, r.RemoteAddr) {
+					w.WriteHeader(400)
+					return
+				}
+				name := buff.String()
+
+				candidates, err := getCandidates()
+				if !checkError(err, r.RemoteAddr) {
+					w.WriteHeader(404)
+					return
+				}
+				for _, candidate := range candidates {
+					if candidate.Name == name {
+						_ = json.NewEncoder(w).Encode(map[string]interface{}{"result": 0, "period": candidate.Period})
+						return
+					}
+				}
+				err = json.NewEncoder(w).Encode(map[string]int{"result": 1})
+				checkError(err, r.RemoteAddr)
+			case "guessNumber":
+				data := make(map[string]string)
+				err = json.NewDecoder(r.Body).Decode(&data)
+				if !checkError(err, r.RemoteAddr) {
+					w.WriteHeader(400)
+					return
+				}
+				name, number := data["name"], data["number"]
+				candidates, err := getCandidates()
+				if !checkError(err, r.RemoteAddr) {
+					w.WriteHeader(404)
+					return
+				}
+				for _, candidate := range candidates {
+					if candidate.Name == name {
+						var result map[string]interface{}
+						if strings.Contains(number, candidate.Number) {
+							result = map[string]interface{}{"result": 0, "speak": candidate.Speak}
+						} else {
+							result = map[string]interface{}{"result": 2}
+						}
+						_ = json.NewEncoder(w).Encode(result)
+						return
+					}
+				}
+				_ = json.NewEncoder(w).Encode(map[string]int{"result": 1})
 			}
 			return
 		}

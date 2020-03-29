@@ -40,6 +40,10 @@
         font-style: italic;
         font-size: smaller;
     }
+
+    .card {
+        width: 100%;
+    }
 </style>
 <body>
 <main>
@@ -55,7 +59,8 @@
                     <li class="tab"><a href="#basis">基本</a></li>
                     <li class="tab"><a href="#ability">能力</a></li>
                     <li class="tab"><a href="#events">经历</a></li>
-                    <li class="tab" id="experiment-tab" style="display: none"><a href="#experiment">实验性</a></li>
+                    <li class="tab experiment" id="experiment-tab" style="display: none"><a href="#experiment">实验性</a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -87,7 +92,7 @@
                         <p><i class="material-icons purple-text">school</i><span>江苏省横林高级中学</span></p>
                         <p>
                             <i class="material-icons deep-orange-text">people</i><span>家庭成员</span>
-                            <a id="btn-family-collection" href="#" style="position: absolute; right: 10px"><i
+                            <a id="btn-family-collection" class="right-absolute" href="#"><i
                                     class="material-icons black-text">expand_more</i></a>
                         </p>
                         <div class="family-collection level-2" style="display: none">
@@ -105,6 +110,47 @@
                         <p><i class="material-icons blue-text">phone</i><span>136 8526 2029</span></p>
                         <p><i class="material-icons red-text">email</i><span>zhufuzhufu1@gmail.com</span></p>
                         <p><img src="/shared/external/QQ-logo.png"><span>1095291434</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <a class="right black-text waves-effect" id="voice-help"><i class="material-icons">help</i> </a>
+                        <span class="card-title">口语</span>
+                        <p>
+                            <strong>汉语</strong>
+                            <a class="waves-effect black-text right-absolute"
+                               onclick="document.getElementById('chinese-player').play()"><i class="material-icons">play_arrow</i>
+                            </a>
+                            <audio src="/shared/voice/Ch.wav" id="chinese-player"></audio>
+                        </p>
+                        <p>
+                            <strong>英语</strong>
+                            <a class="waves-effect black-text right-absolute"
+                               onclick="document.getElementById('english-player').play()"><i class="material-icons">play_arrow</i>
+                            </a>
+                            <audio src="/shared/voice/Eng.wav" id="english-player"></audio>
+                        </p>
+                    </div>
+                </div>
+                <div class="card" id="musical-card">
+                    <div class="card-content">
+                        <span class="card-title">音乐审美</span>
+                        <a class="right black-text" id="btn-video-expand" style="line-height: 10px" href="#">
+                            <i class="material-icons">expand_more</i>
+                        </a>
+                        <i>AlanWalker - Play</i>
+                        <div id="expanding-video" style="display: none">
+                            <video src="/shared/music/AlanWalker-Play.mp4" controls width="100%"></video>
+                        </div>
+                        <p>
+                            <p class="red-text small">纯音乐</p>
+                            <i>幻華楽 - 少女綺想曲 ~Dream Battle</i>
+                            <audio src="/shared/music/Dream-Battle.mp3" controls style="width: 100%"></audio>
+                        </p>
+                        <p>
+                            <i>Lensko - Infinite</i>
+                            <audio src="/shared/music/Infinite.m4a" controls style="width: 100%"></audio>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -163,8 +209,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col s12 m6">
                 <div class="card">
                     <div class="card-content">
                         <span class="card-title">体貌</span>
@@ -183,13 +227,28 @@
         <div id="events">
             <a class="waves-effect right black-text" id="events-help"><i class="material-icons">help</i> </a>
         </div>
-        <div id="experiment">
+        <div id="experiment" class="experiment">
             <p class="orange-text">zhufucdev不能保证其中的信息绝对客观真实。</p>
-            <div class="card">
-                <div class="card-content" style="display: flex">
-                    <div class="waves-effect" id="iq-help">
-                        <i class="material-icons blue white-text circle-mdi circle">assistant</i>
-                        <span>智商: 142</span>
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="card waves-effect">
+                        <div class="card-content" style="line-height: 40px" id="iq-help">
+                            <i class="material-icons blue white-text circle-mdi circle">assistant</i>
+                            <span style="margin-left: 10px">智商: 142</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m6">
+                    <div class="card waves-effect">
+                        <div class="card-content" style="line-height: 40px">
+                            <a class="waves-effect right" id="attached-to-help">
+                                <i class="material-icons black-text" style="vertical-align: middle">help</i>
+                            </a>
+                            <div id="card-attached-to">
+                                <i class="material-icons red white-text circle-mdi circle">stars</i>
+                                <span style="margin-left: 10px">喜欢的人</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -203,6 +262,32 @@
     </div>
     <div class="modal-footer">
         <a class="waves-effect btn-flat modal-close">确定</a>
+    </div>
+</div>
+<div class="modal experiment" id="modal-attached-to">
+    <div class="modal-content">
+        <h4>猜测</h4>
+        <div class="input-field">
+            <input type="text" id="input-attached-to">
+            <label for="input-attached-to">候选人姓名</label>
+            <span class="helper-text red-text" id="not-attached-to" style="display: none">似乎并不</span>
+        </div>
+        <div class="input-field" id="input-field-number" style="display: none">
+            <input type="number" id="input-number">
+            <label for="input-number">您的电话号码</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect btn-flat" id="attached-to-confirm">确定</a>
+    </div>
+</div>
+<div class="modal modal-fixed-footer experiment" id="modal-speak-attached-to">
+    <div class="modal-content">
+        <h4>留言</h4>
+        <p id="speak-attached-to"></p>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect btn-flat">关闭</a>
     </div>
 </div>
 <script>
@@ -238,6 +323,7 @@
     function expandable(btn, toBeExpanded) {
         btn.onclick = () => {
             let toShow = toBeExpanded.style.display === "none";
+
             let animator = (toShow ? new ObjectAnimator(0, 1) : new ObjectAnimator(1, 0));
             let collectionHeight = btn.parentElement.clientHeight * toBeExpanded.children.length;
             if (toShow) {
@@ -245,10 +331,12 @@
             }
             toBeExpanded.style.display = null;
             animator.duration = 300;
+            let html = document.querySelector('html'), originalScrollTop = html.scrollTop;
             animator.addUpdateListener(v => {
                 btn.style.transform = "rotateX(" + 180 * v + "deg)";
                 toBeExpanded.style.height = collectionHeight * v + "px";
                 toBeExpanded.style.opacity = v.toString();
+                html.scrollTop = originalScrollTop;
             });
             animator.doOnEnd(() => {
                 toBeExpanded.style.height = toBeExpanded.style.opacity = null;
@@ -264,6 +352,7 @@
     expandable(document.getElementById('btn-iphone-collection'), document.querySelector('.iphone-collection'));
     expandable(document.getElementById('btn-phone-collection'), document.querySelector('.phone-collection'));
     expandable(document.getElementById('btn-band-collection'), document.querySelector('.band-collection'));
+    expandable(document.getElementById('btn-video-expand'), document.getElementById('expanding-video'));
     /* Abilities */
     let ability = Repeat.init(document.getElementById('ability'));
     ability.model = `
@@ -288,9 +377,28 @@
     }
 
     function getEventArgs(data) {
+        let color, random = Math.floor(Math.random() * 10) % 5;
+        switch (random) {
+            case 0:
+                color = 'red';
+                break;
+            case 1:
+                color = 'blue';
+                break;
+            case 2:
+                color = 'purple';
+                break;
+            case 3:
+                color = 'green';
+                break;
+            case 4:
+                color = 'orange';
+                break;
+        }
         return {
             icon: typeof data.icon === "string" ? data.icon : 'event',
-            content: data.content
+            content: data.content,
+            color: color
         }
     }
 
@@ -298,7 +406,7 @@
     let events = Repeat.init(document.getElementById('events'));
     events.model = `
 <div style="margin: 10px">
-    <i class="material-icons circle red white-text circle-mdi">%icon</i>
+    <i class="material-icons circle white-text circle-mdi %color">%icon</i>
     <span style="vertical-align: middle">%content</span>
 </div>
     `;
@@ -352,10 +460,10 @@
 
     function attachHelperTo(id, content) {
         let ele = document.getElementById(id);
-        ele.addEventListener('click', () => {
+        ele.onclick = () => {
             textEle.innerHTML = content;
             $('#modal-helper').modal('open');
-        })
+        }
     }
 
     attachHelperTo('ability-help', '此处仅罗列正常人在十岁后自然学习所不能获得的能力。包括但不仅限。');
@@ -366,11 +474,91 @@
 <h5>怎么看</h5>
 从左往右、从上往下表示事件之间的相对时间从古至今。
     `);
-    attachHelperTo('iq-help', '根据<a href="https://baike.baidu.com/item/%E6%96%AF%E5%9D%A6%E7%A6%8F-%E6%AF%94%E5%A5%88%E6%99%BA%E5%95%86%E6%B5%8B%E9%AA%8C/1768055?fr=aladdin">斯坦福-比奈测验</a>。');
+    attachHelperTo('iq-help', '根据<a href="https://baike.baidu.com/item/%E6%96%AF%E5%9D%A6%E7%A6%8F-%E6%AF%94%E5%A5%88%E6%99%BA%E5%95%86%E6%B5%8B%E9%AA%8C/1768055?fr=aladdin">斯坦福-比奈测验' +
+        '</a>，测于2017年5月。');
+    attachHelperTo('voice-help', '音频由Redmi K30 5G自带麦克风录制。');
     /* Experiment Feature */
+    let expTab = document.getElementById('experiment-tab');
     if (Settings.getPreference('experiment-feature').value) {
-        let expTab = document.getElementById('experiment-tab');
         expTab.style.display = null;
+        /* Attached To */
+        attachHelperTo('attached-to-help', '此项通常包括但不考虑与之有血缘关系的人。<br>zhufucdev并不想直接告诉您其具体内容，但您可以点击卡片来猜测，服务器会给予是或否的响应。此外，服务器不会记录猜测者的信息。');
+        let attachedToCard = document.getElementById('card-attached-to');
+        attachedToCard.onclick = () => {
+            let modal = M.Modal.getInstance(document.getElementById('modal-attached-to')),
+                attachedToInput = document.getElementById('input-attached-to'),
+                helper = document.getElementById('not-attached-to'),
+                numberField = document.getElementById('input-field-number'),
+                numberInput = document.getElementById('input-number'),
+                confirm = document.getElementById('attached-to-confirm');
+            attachedToInput.value = numberInput.value = null;
+            numberField.style.display = helper.style.display = 'none';
+            attachedToInput.removeAttribute('disabled');
+            M.updateTextFields();
+            modal.open();
+
+            function isNumberInputShown() {
+                return numberField.style.display !== 'none'
+            }
+
+            function commonErrorHandler(e) {
+                M.toast({html: '服务器拒绝了我们的请求：' + e.status});
+            }
+
+            function trial() {
+                helper.style.display = 'none';
+                $.ajax({
+                    url: '/about?request=guessAttachedTo',
+                    method: 'POST',
+                    data: attachedToInput.value,
+                    dataType: 'json',
+                    success: function (r) {
+                        if (r.result === 1) {
+                            helper.textContent = "似乎并不";
+                        } else if (r.result === 0) {
+                            if (!isNumberInputShown())
+                                fadeIn(numberField);
+                            attachedToInput.setAttribute('disabled', '');
+                            helper.textContent = r['period'];
+                        }
+                        helper.style.display = null;
+                    },
+                    error: commonErrorHandler
+                })
+            }
+
+            function numberTrial() {
+                if (numberInput.value) {
+                    $.ajax({
+                        url: '/about?request=guessNumber',
+                        method: 'POST',
+                        data: JSON.stringify({name: attachedToInput.value, number: numberInput.value}),
+                        dataType: 'json',
+                        success: function (r) {
+                            if (r.result === 0) {
+                                let modalSpeak = M.Modal.getInstance(document.getElementById('modal-speak-attached-to'));
+                                let speak = document.getElementById('speak-attached-to');
+                                speak.innerHTML = r['speak'];
+                                modalSpeak.open();
+                            }
+                            modal.close();
+                        },
+                        error: commonErrorHandler
+                    })
+                } else {
+                    modal.close()
+                }
+            }
+
+            attachedToInput.onchange = trial;
+            confirm.onclick = () => {
+                if (isNumberInputShown()) {
+                    numberTrial()
+                }
+            }
+        }
+    } else {
+        document.querySelectorAll('.experiment').forEach(v => v.remove())
     }
 </script>
 </body>

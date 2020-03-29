@@ -22,3 +22,8 @@ main {
     text-align: center;
     line-height: 40px;
 }
+
+.right-absolute {
+    position: absolute;
+    right: 10px;
+}
