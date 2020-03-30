@@ -2,7 +2,7 @@
   "port": 3000,
   "admin_pwd": "qwerty",
   "black_most": 10,
-  "https_port": 443,
+  "https_port": -1,
   "public_key": "cert.pem",
   "private_key": "privkey.pem"
 }

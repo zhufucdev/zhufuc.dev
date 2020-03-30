@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -76,21 +75,25 @@ func responseFile(w http.ResponseWriter, path string, shared bool, r *http.Reque
 	} else {
 		src += path
 	}
-	// Set MIME type
-	mime, err2 := GetFileContentType(src)
-	if err2 == nil {
-		w.Header().Set("Content-Type", mime)
-	}
-	// Send file
-	file, err := os.Open(src)
-	if err != nil {
-		log.Printf("Error while reading file at shared/%s: %s", src, err.Error())
-		return
-	}
-	log.Printf("Sending %s to %s as %s", path, r.RemoteAddr, mime)
-	_, err3 := io.Copy(w, file)
-	checkError(err3, r.RemoteAddr)
-	_ = file.Close()
+	http.ServeFile(w, r, src)
+	/*
+		// Set MIME type
+		mime, err2 := GetFileContentType(src)
+		if err2 == nil {
+			w.Header().Set("Content-Type", mime)
+		}
+		// Send file
+		file, err := os.Open(src)
+		if err != nil {
+			log.Printf("Error while reading file at shared/%s: %s", src, err.Error())
+			return
+		}
+		log.Printf("Sending %s to %s as %s", path, r.RemoteAddr, mime)
+		_, err3 := io.Copy(w, file)
+		checkError(err3, r.RemoteAddr)
+		_ = file.Close()
+
+	*/
 }
 
 func homepage(w http.ResponseWriter, r *http.Request) {
@@ -324,6 +327,12 @@ func settingsPage(w http.ResponseWriter, r *http.Request) {
 	responseFile(w, "settings.html", false, r)
 }
 
+func redirect() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
+	}
+}
+
 var profile Profile
 
 func main() {
@@ -332,8 +341,9 @@ func main() {
 	fallback := func() {
 		log.Println("Falling back.")
 		profile = Profile{
-			Port:     3000,
-			AdminPwd: "qwerty",
+			Port:      3000,
+			AdminPwd:  "qwerty",
+			HttpsPort: -1,
 		}
 	}
 	startServer := func() {
@@ -346,6 +356,7 @@ func main() {
 		http.HandleFunc("/settings", settingsPage)
 		if profile.HttpsPort != -1 {
 			log.Println("HTTPS listen on port", profile.HttpsPort)
+			go http.ListenAndServe(":"+strconv.FormatInt(int64(80), 10), redirect())
 			log.Fatal(http.ListenAndServeTLS(":"+strconv.FormatInt(int64(profile.HttpsPort), 10), profile.PublicKey, profile.PrivateKey, nil))
 		} else {
 			log.Println("Listen on port", profile.Port)
