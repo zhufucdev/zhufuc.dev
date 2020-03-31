@@ -88,6 +88,9 @@
 </body>
 <script>
     animateTitle('设置');
+    if (!checkBrowser()) {
+        $('#browser-not-supported').show()
+    }
     M.AutoInit();
     Settings.autoInit();
 </script>

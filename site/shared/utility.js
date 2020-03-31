@@ -98,6 +98,7 @@ function animateTitle(title) {
 
 function fadeOut(ele, onEnd) {
     let animator = new ObjectAnimator(1, 0);
+    if (ele.style.display === 'none') ele.style.display = null;
     animator.addUpdateListener(v => ele.style.opacity = v.toString());
     animator.doOnEnd(onEnd);
     animator.start();

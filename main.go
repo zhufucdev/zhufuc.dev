@@ -33,32 +33,6 @@ type AttachedTo struct {
 const profilePath string = "config.json"
 const constantsPath string = "site/shared/constants.json"
 
-// Override the detection of Golang which is not satisfying.
-func GetFileContentType(path string) (string, error) {
-	if strings.HasSuffix(path, ".html") {
-		return "text/html", nil
-	} else if strings.HasSuffix(path, ".css") {
-		return "text/css", nil
-	} else if strings.HasSuffix(path, ".js") {
-		return "text/javascript", nil
-	} else if strings.HasSuffix(path, ".svg") {
-		return "image/svg+xml", nil
-	}
-	buffer := make([]byte, 512)
-	out, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	_, err2 := out.Read(buffer)
-	if err2 != nil {
-		return "", err2
-	}
-
-	contentType := http.DetectContentType(buffer)
-
-	return contentType, nil
-}
-
 func checkError(err error, guest string) bool {
 	if err != nil {
 		fmt.Printf("Error while communicating with %s: %s", guest, err.Error())
@@ -76,24 +50,6 @@ func responseFile(w http.ResponseWriter, path string, shared bool, r *http.Reque
 		src += path
 	}
 	http.ServeFile(w, r, src)
-	/*
-		// Set MIME type
-		mime, err2 := GetFileContentType(src)
-		if err2 == nil {
-			w.Header().Set("Content-Type", mime)
-		}
-		// Send file
-		file, err := os.Open(src)
-		if err != nil {
-			log.Printf("Error while reading file at shared/%s: %s", src, err.Error())
-			return
-		}
-		log.Printf("Sending %s to %s as %s", path, r.RemoteAddr, mime)
-		_, err3 := io.Copy(w, file)
-		checkError(err3, r.RemoteAddr)
-		_ = file.Close()
-
-	*/
 }
 
 func homepage(w http.ResponseWriter, r *http.Request) {

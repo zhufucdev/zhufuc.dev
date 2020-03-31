@@ -3,22 +3,58 @@
     "name": "MCRE",
     "subtitle": "Minecraft Java版和基岩版的资源包编辑器在Android平台的实现",
     "lang": "kt",
-    "status": 1,
-    "category": "程序"
+    "category": "程序",
+    "description": {
+      "screenshots": [
+        ".../MCRE/1.png",
+        ".../MCRE/2.png",
+        ".../MCRE/3.png"
+      ],
+      "status": 1,
+      "text": [
+        "遵循Material Design 2设计标准及模块化的项目标准。"
+      ]
+    }
   },
   {
     "name": "OpenCraft",
     "subtitle": "开源的Minecraft Java版服务器",
-    "lang": ["kt","java","js","html","css"],
-    "status": 2,
-    "category": "程序"
+    "lang": [
+      "kt",
+      "java",
+      "js",
+      "html",
+      "css"
+    ],
+    "category": "程序",
+    "description": {
+      "status": 2,
+      "description": [
+        "思想服务器"
+      ]
+    }
   },
   {
     "name": "PCtoPE",
     "subtitle": "Minecraft Java版资源包到基岩版的转化器在Android平台的实现",
     "lang": "kt",
-    "status": 0,
-    "category": "程序"
+    "category": "程序",
+    "description": {
+      "screenshots": [
+        ".../PCtoPE/1.png",
+        ".../PCtoPE/2.png",
+        ".../PCtoPE/3.png",
+        ".../PCtoPE/4.png"
+      ],
+      "status": 0,
+      "text": [
+        "第一个Android项目，发布于酷安网，生命周期为2017年2月至2018年5月。",
+        "作为早期作品，其中有亮点，比如遵循Material Design初代的设计规范，不足也难以忽略，如写法不够规范，甚至有些冗余，zhufucdev因此认为该项目很难维护。",
+        "为了跟进新的设计标准，以及将软件的功能推向更广范围，zhufucdev已将该项目归档，并转向新的开发过程。"
+      ],
+      "github": "https://github.com/zhufucdev/PCtoPE",
+      "license": "GPL-v3"
+    }
   },
   {
     "name": "ScoreManager",

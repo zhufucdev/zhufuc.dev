@@ -13,6 +13,7 @@
     <script src="/shared/splash.js"></script>
     <script src="/shared/utility.js"></script>
     <script src="/shared/settings.js"></script>
+    <script src="/shared/content-viewer.js"></script>
 </head>
 <body>
 <main>
@@ -101,6 +102,13 @@
         <div class="repeater"></div>
     </div>
 </main>
+<div class="card viewer" id="card-viewer" style="display: flex">
+    <img src="shared/project-icons/MCRE.png" style="height: 20vw; " class="shared-element">
+    <div class="card-content" style="display: block">
+        <span class="card-title">未名称</span>
+        <p id="subtitle"></p>
+    </div>
+</div>
 </body>
 <script>
     if (!checkBrowser()) {
@@ -137,6 +145,7 @@
         else
             insert();
     }
+
     animateTitle("项目");
     let repeater;
     try {
@@ -144,8 +153,10 @@
         $(repeater.contentElement).addClass('row');
         repeater.model = `
 <div class="col s12 m6">
-    <div class="card">
-        <div class="card-image"><img src="/shared/project-icons/%name.png"></div>
+    <div class="card waves-effect" style="width: 100%">
+        <div class="card-image">
+            <img class="shared-element" data-target="#card-viewer" src="/shared/project-icons/%name.png">
+        </div>
         <div class="card-stacked">
             <div class="card-content">
                 <span class="card-title">%name</span>
@@ -166,6 +177,7 @@
         success: (r) => {
             try {
                 repeater.beginUpdate();
+                let viewerCard = document.querySelector('.viewer');
                 r.forEach(project => {
                     function langByCode(code) {
                         let language;
@@ -215,8 +227,20 @@
                     }
                     project.lang = languages;
                     hideProgress();
-                    repeater.push(project, project.category);
+                    let newEle = repeater.push(project, project.category);
+                    newEle.addEventListener('click', () => {
+                        viewer.sharedA = newEle.querySelector('img');
+                        viewer.sharedB.setAttribute('src', viewer.sharedA.getAttribute('src'));
+                        viewer.updateHeight();
+
+                        let title = viewerCard.querySelector('.card-title');
+                        title.textContent = project.name;
+                        let subtitle = viewerCard.querySelector('#subtitle');
+                        subtitle.textContent = project['subtitle'];
+                        viewer.show();
+                    });
                 });
+                let viewer = ContentViewer.init(viewerCard, {hideOnTouch: true});
                 repeater.endUpdate();
             } catch (e) {
                 showError('无法加载数据：' + e)
