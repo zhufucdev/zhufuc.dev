@@ -12,7 +12,9 @@
       ],
       "status": 1,
       "text": [
-        "遵循Material Design 2设计标准及模块化的项目标准。"
+        "遵循Material Design 2设计标准及模块化的项目标准。",
+        "生命周期为2019年4月至今。",
+        "项目很可能因为zhufucdev学业的缘故而进展缓慢。"
       ]
     }
   },
@@ -30,7 +32,9 @@
     "description": {
       "status": 2,
       "text": [
-        "思想服务器"
+        "zhufucdev理想中的Minecraft服务器项目，即鼓励所有玩家提供帮助，不强调等级制度。生命周期为2018年7月至今。",
+        "服务器周期性关闭，但项目开发不会停止。zhufucdev计划开发ServerScript作为服务器下一代的开发方式，同时降低门槛，争取让玩家也有机会参与开发。",
+        "服务器在每年暑假开放，并推出季度更新。"
       ]
     }
   },
@@ -60,7 +64,13 @@
     "name": "ScoreManager",
     "subtitle": "小组制学校计分解决方案在WinForm平台的实现",
     "lang": "cs",
-    "status": 0,
-    "category": "程序"
+    "category": "程序",
+    "description": {
+      "status": 0,
+      "text": [
+        "第一个C#作品，仅在横林高级中学小范围使用，生命周期为2019年10月至2019年12月。",
+        "因为WinForm自身的局限性被归档。"
+      ]
+    }
   }
 ]
