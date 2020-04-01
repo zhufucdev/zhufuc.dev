@@ -7,9 +7,17 @@ let ContentViewer = {};
 
     class Viewer {
         constructor(ele, options) {
+            Object.defineProperty(this, 'rootElement', {
+                get() {
+                    return ele
+                }
+            });
             ele.style.bottom = -ele.clientHeight + 'px';
             ele.style.zIndex = '1001';
+            ele.style.maxHeight = '100%';
+            ele.style.overflowY = 'auto';
             this.shown = false;
+            this.onhide = undefined;
             this.updateHeight = () => {
                 if (!this.shown)
                     ele.style.bottom = -ele.clientHeight + 'px';
@@ -64,6 +72,7 @@ let ContentViewer = {};
             this.hide = () => {
                 this.$hideBlocker();
                 this.$hideCard();
+                if (typeof this.onhide === "function") this.onhide();
             };
             if (options !== undefined) {
                 if (options.hideOnTouch === true) {
@@ -76,7 +85,8 @@ let ContentViewer = {};
     class ElementSharedViewer extends Viewer {
         constructor(ele, sharedA, sharedB, options) {
             super(ele, options);
-            this.sharedA = sharedA; this.sharedB = sharedB;
+            this.sharedA = sharedA;
+            this.sharedB = sharedB;
             let measureAll = () => {
                 this.sharedA.position = measure(this.sharedA);
                 this.sharedB.position = measure(this.sharedB, false);
@@ -113,6 +123,7 @@ let ContentViewer = {};
                     ele.style.width = (to.width - from.width) * v + from.width + 'px';
                     ele.style.height = (to.height - from.height) * v + from.height + 'px';
                 }
+
                 ele = clone(ele, true);
                 ele.style.position = 'fixed';
                 update(0);

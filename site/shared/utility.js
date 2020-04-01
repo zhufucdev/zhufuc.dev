@@ -125,3 +125,7 @@ function fadeSwitch(ele, newHTML) {
     animator.duration = 200;
     animator.start()
 }
+
+function isWideScreen() {
+    return window.innerWidth >= 993
+}

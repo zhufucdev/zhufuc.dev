@@ -102,11 +102,29 @@
         <div class="repeater"></div>
     </div>
 </main>
-<div class="card viewer" id="card-viewer" style="display: flex">
-    <img src="shared/project-icons/MCRE.png" style="height: 20vw; " class="shared-element">
-    <div class="card-content" style="display: block">
-        <span class="card-title">未名称</span>
-        <p id="subtitle"></p>
+<div class="card viewer" id="card-viewer">
+    <div style="display: flex; padding-bottom: 0" class="card-content">
+        <img style="height: 20vw;" src="/shared/project-icons/OpenCraft.png" class="shared-element">
+        <div style="display: block; flex: 1; margin-left: 10px" id="viewer-title">
+            <span class="card-title">未名称</span>
+            <p id="subtitle"></p>
+        </div>
+    </div>
+    <div id="viewer-description" class="card-content" style="padding-top: 4px">
+        <div class="card-panel red lighten-3 z-depth-0 white-text col s4 m4" style="width: 100%; line-height: 30px;"
+             id="viewer-status-card">
+            <i class="material-icons" style="font-size: 30px; vertical-align: middle">error</i>
+            <span style="margin-left: 10px" id="viewer-status">开发状态</span>
+        </div>
+        <div class="card-panel red lighten-3 z-depth-0 white-text col s8 m8" style="width: 100%"
+             id="viewer-description-card">
+            <div style="line-height: 30px">
+                <i class="material-icons" style="font-size: 30px; vertical-align: middle">description</i>
+                <span style="margin-left: 10px; font-size: larger; vertical-align: middle">简介</span>
+                <p id="viewer-description-text" style="margin-left: 10px"></p>
+                <div class="carousel carousel-slider no-autoinit" id="carousel"></div>
+            </div>
+        </div>
     </div>
 </div>
 </body>
@@ -171,13 +189,103 @@
         showError('无法初始化Repeater: ' + e)
     }
 
+    function cardFor(itemRoot, project, viewer) {
+
+        viewer.rootElement.scrollTop = 0;
+        viewer.sharedA = itemRoot.querySelector('img');
+        viewer.sharedB.setAttribute('src', viewer.sharedA.getAttribute('src'));
+
+        let title = viewer.rootElement.querySelector('.card-title');
+        title.textContent = project.name;
+        let subtitle = viewer.rootElement.querySelector('#subtitle');
+        subtitle.textContent = project['subtitle'];
+
+        /* Description Control */
+        function hideUndefined(selector, judge) {
+            let r = typeof judge === 'undefined';
+            viewer.rootElement.querySelector(selector).style.display = (r ? 'none' : null);
+            return r
+        }
+        let descriptionLayout = viewer.rootElement.querySelector('#viewer-description');
+        if (typeof project.description === "undefined") {
+            descriptionLayout.style.display = 'none';
+            return;
+        } else {
+            descriptionLayout.style.display = null;
+        }
+        function layout() {
+            let isSmallLayout = descriptionLayout.parentElement === viewer.rootElement,
+                titleLayout = viewer.rootElement.querySelector('#viewer-title');
+            if (isWideScreen()) {
+                if (!isSmallLayout) return;
+                descriptionLayout.remove();
+                descriptionLayout.removeAttribute('class');
+                titleLayout.insertAdjacentElement('beforeend', descriptionLayout);
+            } else {
+                if (isSmallLayout) return;
+                descriptionLayout.remove();
+                descriptionLayout.setAttribute('class', 'card-content');
+                viewer.rootElement.insertAdjacentElement('beforeend', descriptionLayout);
+            }
+        }
+        window.onresize = layout;
+        viewer.onhide = () => window.onresize = null;
+
+        layout();
+        if (!hideUndefined('#viewer-status-card', project.description.status)) {
+            let status = viewer.rootElement.querySelector('#viewer-status');
+            switch (project.description.status) {
+                case 0:
+                    status.textContent = '项目已完成且不再维护';
+                    break;
+                case 1:
+                    status.textContent = '项目正在进行';
+                    break;
+                case 2:
+                    status.textContent = '项目已完成且正在维护';
+                    break;
+                default:
+                    status.textContent = '项目状态代码为' + project.description.status;
+            }
+        }
+
+        if (!hideUndefined('#viewer-description-card', project.description.text)) {
+            let text = viewer.rootElement.querySelector('#viewer-description-text');
+            if (Array.isArray(project.description.text)) {
+                text.innerHTML = '';
+                for (let i in project.description.text) {
+                    text.innerHTML += '<p>' + project.description.text[i] + '</p>';
+                }
+            } else text.textContent = project.description.text;
+        }
+
+        if (!hideUndefined('#carousel', project.description.screenshots)) {
+            let ele = document.querySelector('#carousel'), screenshots = project.description.screenshots;
+            (function () {
+                let oldInstance = M.Carousel.getInstance(ele);
+                if (oldInstance) oldInstance.destroy();
+            })();
+            ele.innerHTML = '';
+            for (let i in screenshots) {
+                if (screenshots.hasOwnProperty(i)) {
+                    let shot = screenshots[i];
+                    shot = shot.replace('...', '/shared/project-screenshots');
+                    ele.innerHTML += '<div class="carousel-item"><img style="height: 400px; width: auto;' +
+                        ' position: absolute; left: 50%; transform: translateX(-50%)" src="' + shot + '"/></div>';
+                }
+            }
+            M.Carousel.init(ele, {indicators: true, fullWidth: true});
+        }
+
+        viewer.updateHeight();
+    }
+
     $.ajax({
         url: '/shared/projects.json',
         dataType: 'json',
         success: (r) => {
             try {
                 repeater.beginUpdate();
-                let viewerCard = document.querySelector('.viewer');
                 r.forEach(project => {
                     function langByCode(code) {
                         let language;
@@ -229,21 +337,14 @@
                     hideProgress();
                     let newEle = repeater.push(project, project.category);
                     newEle.addEventListener('click', () => {
-                        viewer.sharedA = newEle.querySelector('img');
-                        viewer.sharedB.setAttribute('src', viewer.sharedA.getAttribute('src'));
-                        viewer.updateHeight();
-
-                        let title = viewerCard.querySelector('.card-title');
-                        title.textContent = project.name;
-                        let subtitle = viewerCard.querySelector('#subtitle');
-                        subtitle.textContent = project['subtitle'];
+                        cardFor(newEle, project, viewer);
                         viewer.show();
                     });
                 });
-                let viewer = ContentViewer.init(viewerCard, {hideOnTouch: true});
+                let viewer = ContentViewer.init(document.querySelector('.viewer'), {hideOnTouch: true});
                 repeater.endUpdate();
             } catch (e) {
-                showError('无法加载数据：' + e)
+                showError('无法加载数据：' + e);
             }
         },
         error: function (e) {
