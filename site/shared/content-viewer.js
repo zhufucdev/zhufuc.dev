@@ -23,6 +23,34 @@ let ContentViewer = {};
                     ele.style.bottom = -ele.clientHeight + 'px';
             };
             window.addEventListener('resize', this.updateHeight);
+            /* Swipe down to close */
+            let startPos = {}, movedY = 0, movedX = 0, wantsToClose = false;
+            ele.addEventListener('touchstart', function (event) {
+                let touch = event.targetTouches[0];
+                startPos = {x: touch.pageX, y: touch.pageY};
+            });
+            ele.addEventListener('touchmove', (event) => {
+                if (event.targetTouches.length > 1 || event.scale && event.scale !== -1
+                    || ele.scrollTop >= 10) return;
+                let touch = event.targetTouches[0];
+                movedX = touch.pageX - startPos.x; movedY = touch.pageY - startPos.y;
+                if (movedY > 0 && movedY > Math.abs(movedX)) {
+                    wantsToClose = true;
+                    ele.style.bottom = -movedY + 'px';
+                } else {
+                    wantsToClose = false;
+                }
+            });
+            ele.addEventListener('touchend', () => {
+                if (wantsToClose) {
+                    if (movedY >= ele.clientHeight * 0.3) {
+                        this.hide();
+                        wantsToClose = false;
+                    } else {
+                        this.$showCard();
+                    }
+                }
+            });
             /* Make a blocker */
             let blocker = document.createElement('div');
             blocker.style.display = 'none';
@@ -35,6 +63,7 @@ let ContentViewer = {};
             document.body.insertAdjacentElement('beforeend', blocker);
 
             let originalBodyOverflow;
+            this.isMoving = false;
             this.$showBlocker = () => {
                 let animator = new ObjectAnimator(0, 0.5);
                 animator.addUpdateListener(v => blocker.style.opacity = v.toString());
@@ -54,22 +83,34 @@ let ContentViewer = {};
                 animator.start();
             };
             this.$showCard = () => {
-                let animator = new ObjectAnimator(-ele.clientHeight, 0);
+                this.isMoving = true;
+                ele.style.opacity = null;
+                let animator = new ObjectAnimator(parseInt(ele.style.bottom), 0);
                 animator.addUpdateListener(v => ele.style.bottom = v + 'px');
-                animator.doOnEnd(() => this.shown = true);
+                animator.doOnEnd(() => {
+                    this.shown = true;
+                    this.isMoving = false;
+                });
                 animator.start();
             };
             this.$hideCard = () => {
-                let animator = new ObjectAnimator(0, -ele.clientHeight);
+                this.isMoving = true;
+                let animator = new ObjectAnimator(parseInt(ele.style.bottom), -ele.clientHeight);
                 animator.addUpdateListener(v => ele.style.bottom = v + 'px');
-                animator.doOnEnd(() => this.shown = false);
+                animator.doOnEnd(() => {
+                    this.shown = false;
+                    ele.style.opacity = '0';
+                    this.isMoving = false;
+                });
                 animator.start();
             };
             this.show = () => {
+                if (this.isMoving) return;
                 this.$showBlocker();
                 this.$showCard();
             };
             this.hide = () => {
+                if (this.isMoving) return;
                 this.$hideBlocker();
                 this.$hideCard();
                 if (typeof this.onhide === "function") this.onhide();
@@ -116,7 +157,7 @@ let ContentViewer = {};
 
             }
 
-            function move(ele, from, to, prepare, end) {
+            function moveClone(ele, from, to, prepare, end) {
                 function update(v) {
                     ele.style.left = (to.x - from.x) * v + from.x + 'px';
                     ele.style.top = (to.y - from.y) * v + from.y + 'px';
@@ -134,8 +175,8 @@ let ContentViewer = {};
                 let animator = new ObjectAnimator(0, 1);
                 animator.addUpdateListener(update);
                 animator.doOnEnd(() => {
-                    ele.remove();
                     if (typeof end === "function") end()
+                    ele.remove();
                 });
                 animator.start();
             }
@@ -149,19 +190,21 @@ let ContentViewer = {};
             }
 
             this.show = () => {
-                measureAll();
+                if (this.isMoving) return;
                 this.$showCard();
                 this.$showBlocker();
-                move(this.sharedB, this.sharedA.position, this.sharedB.position,
+                measureAll();
+                moveClone(this.sharedB, this.sharedA.position, this.sharedB.position,
                     () => this.sharedB.style.opacity = this.sharedA.style.opacity = '0',
                     () => this.sharedB.style.opacity = null);
             };
 
             this.hide = () => {
+                if (this.isMoving) return;
                 measureAll();
                 this.$hideCard();
                 this.$hideBlocker();
-                move(this.sharedA, this.sharedB.position, this.sharedA.position,
+                moveClone(this.sharedA, this.sharedB.position, this.sharedA.position,
                     () => this.sharedB.style.opacity = this.sharedA.style.opacity = '0',
                     () => this.sharedA.style.opacity = null);
             }
