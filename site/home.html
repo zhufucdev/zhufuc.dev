@@ -40,6 +40,7 @@
             </div>
         </li>
         <li><a class="selected-item waves-effect"><i class="material-icons">build</i>项目</a></li>
+        <li><a class="waves-effect" href="blog"><i class="material-icons">collections_bookmark</i>博客</a></li>
         <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于</a></li>
         <li><a class="waves-effect" href="settings"><i class="material-icons">settings</i>设置</a></li>
     </ul>
@@ -129,14 +130,11 @@
 </div>
 </body>
 <script>
+    Settings.lastPage = 'home';
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
     }
-    let splashPreference = Settings.createPreference('splash', false);
-    if (!splashPreference.value) {
-        document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
-        splashPreference.value = true;
-    }
+    checkWelcomeSplash();
     let progress = document.querySelector('.progress-bar');
     let repeaterEle = document.querySelector('.repeater');
     let errorDis = document.querySelector('#error-display');

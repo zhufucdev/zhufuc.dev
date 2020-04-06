@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zhufucdev.edit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/shared/materialize.css">
+    <link rel="stylesheet" href="/shared/material-icons.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/shared/cm/codemirror.css">
+    <link rel="stylesheet" href="/shared/cm/material.css">
+    <link rel="stylesheet" href="/shared/hljs-androidstudio.css">
+    <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/cookies.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/repeater.js"></script>
+    <script src="/shared/content-viewer.js"></script>
+    <script src="/shared/cm/codemirror.js"></script>
+    <script src="/shared/cm/markdown/markdown.js"></script>
+    <script src="/shared/highlight.js"></script>
+    <script src="/shared/markdown-it.js"></script>
+</head>
+<style>
+    body {
+        background-size: cover;
+        background: linear-gradient(45deg, #00b0ff, #0D47A1) no-repeat fixed;
+        overflow-x: hidden;
+        height: 100%;
+    }
+
+    html {
+        height: 100%;
+    }
+
+    .editor {
+        height: 100%;
+    }
+
+    .editor :first-child {
+        height: 100%;
+    }
+
+    .preview {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: whitesmoke;
+        height: 100%;
+        padding-left: 10px;
+    }
+</style>
+<body style="opacity: 0;">
+<div class="editor" style="opacity: 0;">
+</div>
+<div class="preview z-depth-1-half" style="display: none">
+</div>
+<div style="position: fixed; right: 10px; top: 0; z-index: 100;">
+    <a style="color: white"
+       class="waves-effect waves-light circle"
+       id="btn-delete">
+        <i class="material-icons circle-mdi">delete</i>
+    </a>
+    <a style="color: white"
+       class="waves-effect waves-light circle"
+       id="btn-insert">
+        <i class="material-icons circle-mdi">insert_photo</i>
+    </a>
+    <a style="color: white"
+       class="waves-effect waves-light circle"
+       id="btn-upload">
+        <i class="material-icons circle-mdi">cloud_upload</i>
+    </a>
+    <a style="color: white"
+       class="waves-effect waves-light circle"
+       id="btn-preview">
+        <i class="material-icons circle-mdi">visibility</i>
+    </a>
+</div>
+
+<div id="target-process" style="opacity: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)">
+    <div class="preloader-wrapper active">
+        <div class="spinner-layer spinner-blue">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+
+        <div class="spinner-layer spinner-red">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+
+        <div class="spinner-layer spinner-yellow">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+
+        <div class="spinner-layer spinner-green">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+    </div>
+    <p class="white-text center">获取内容</p>
+</div>
+<div class="fixed-action-btn">
+    <a class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">save</i></a>
+</div>
+<div class="modal" id="modal-save">
+    <div class="modal-content">
+        <h4>保存</h4>
+        <div class="input-field">
+            <input id="title-input" type="text">
+            <label for="title-input">标题</label>
+        </div>
+        <div class="input-field" style="display: flex">
+            <input id="id-input" type="text">
+            <label for="id-input">ID</label>
+            <div id="id-process">
+                <div class="preloader-wrapper small active">
+                    <div class="spinner-layer spinner-blue">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+
+                    <div class="spinner-layer spinner-red">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+
+                    <div class="spinner-layer spinner-yellow">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+
+                    <div class="spinner-layer spinner-green">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="input-field">
+            <input id="category-input" type="text">
+            <label for="category-input">分类</label>
+        </div>
+        <div class="chips no-autoinit"></div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn-flat waves-effect modal-close" id="btn-confirm">确定</a>
+    </div>
+</div>
+<div class="modal modal-fixed-footer" id="modal-attachment">
+    <div class="modal-content">
+        <h4>附件</h4>
+        <div class="preloader-wrapper small active" id="insert-process">
+            <div class="spinner-layer spinner-blue">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-red">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-yellow">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-green">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+        <div id="attachments" class="no-search-bar" style="display: flex; opacity: 0"></div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn-flat waves-effect" id="btn-confirm-insert">插入</a>
+    </div>
+</div>
+<div class="modal" id="modal-delete">
+    <div class="modal-content">
+        <h4>删除日志</h4>
+        <p>此操作无法撤销</p>
+    </div>
+    <div class="modal-footer">
+        <a class="btn-flat waves-effect modal-close">取消</a>
+        <a class="btn-flat waves-effect waves-red" id="btn-delete-confirm">删除</a>
+    </div>
+</div>
+<input type="file" class="hide" id="file-upload">
+</body>
+<script>
+    if (!docCookies.hasItem("passport")) {
+        window.location = "/manage"
+    }
+
+    let editor = document.querySelector('.editor');
+    let cm = CodeMirror(editor, {mode: 'markdown', theme: 'material', lineNumbers: true});
+    let animator = new ObjectAnimator(window.innerWidth, 0);
+    document.body.style.opacity = null;
+    animator.addUpdateListener(v => document.body.style.transform = 'translateX(' + v + 'px)');
+    animator.doOnEnd(() => document.body.style.transform = null);
+    animator.duration = 300;
+    animator.start();
+
+    M.AutoInit();
+
+    let btnPreview = document.getElementById('btn-preview'), preview = document.querySelector('.preview');
+    let btnUpload = document.getElementById('btn-upload'), btnInsert = document.getElementById('btn-insert');
+    let btnDelete = document.getElementById('btn-delete');
+    Object.defineProperty(preview, 'visible', {
+        get() {
+            return preview.style.display !== 'none';
+        },
+        set(v) {
+            preview.style.display = v ? null : 'none'
+        }
+    });
+
+    function render() {
+        preview.innerHTML = markdownit({
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(lang, str).value
+                }
+                return ''
+            }
+        }).render(cm.doc.getValue());
+        preview.querySelectorAll('img').forEach(img => {
+            let slashes = 0, imgResource;
+            for (let i = 0; i < img.src.length; i++) {
+                if (img.src[i] === '/') slashes ++;
+                if (slashes >= 3) {
+                    imgResource = img.src.substring(i + 1);
+                    break;
+                }
+            }
+            img.src = '/blog/' + idInput.value + '/' + imgResource;
+        });
+    }
+
+    function showPreview() {
+        cm.on('changes', render);
+        render();
+
+        let animator = new ObjectAnimator(0, 50);
+        animator.addUpdateListener(v => {
+            preview.style.width = v + '%';
+            editor.style.width = (100 - v) + '%';
+        });
+        preview.visible = true;
+        animator.start();
+
+        function newStyle(ele) {
+            ele.style.color = 'black';
+            ele.classList.remove('waves-light')
+        }
+
+        newStyle(btnPreview);
+        newStyle(btnUpload);
+        newStyle(btnInsert);
+        newStyle(btnDelete)
+    }
+
+    function hidePreview() {
+        cm.off('changes', render);
+        let animator = new ObjectAnimator(50, 0);
+        animator.addUpdateListener(v => {
+            preview.style.width = v + '%';
+            editor.style.width = (100 - v) + '%';
+        });
+        animator.doOnEnd(() => {
+            preview.visible = false;
+
+            function newStyle(ele) {
+                ele.style.color = 'white';
+                ele.classList.add('waves-light')
+            }
+
+            newStyle(btnPreview);
+            newStyle(btnUpload);
+            newStyle(btnInsert);
+            newStyle(btnDelete)
+        });
+        animator.start();
+    }
+
+    btnPreview.addEventListener('click', function () {
+        if (!preview.visible) {
+            showPreview()
+        } else {
+            hidePreview()
+        }
+    });
+
+    btnUpload.addEventListener('click', function () {
+        let input = document.getElementById('file-upload');
+        input.click();
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+            const id = idInput.value;
+            $.ajax({
+                url: '/manage?request=editor&operation=upload&name=' + file.name + '&id=' + id,
+                data: file,
+                method: 'POST',
+                processData: false,
+                contentType: false,
+                success: function () {
+                    M.toast({html: '已上传' + file.name + '至' + id});
+                    updateAttachments()
+                },
+                error: function (e) {
+                    M.toast({html: '无法上传' + file.name + ': ' + e.status})
+                }
+            })
+        })
+    });
+
+    let deleteConfirm = document.getElementById('btn-delete-confirm'), modalDelete = M.Modal.getInstance(document.getElementById('modal-delete'));
+    btnDelete.addEventListener('click', () => modalDelete.open());
+    deleteConfirm.addEventListener('click', function () {
+        $.ajax({
+            url: 'manage?request=editor&operation=delete&id=' + oldID,
+            success: function () {
+                window.location = '/manage'
+            },
+            error: function (e) {
+                M.toast({html: '无法删除' + oldID + ': ' + e.status})
+            }
+        })
+    });
+
+    let saveConfirm = document.getElementById('btn-confirm');
+    let titleInput = document.getElementById('title-input'), idInput = document.getElementById('id-input'),
+        categoryInput = document.getElementById('category-input'),
+        chips;
+    saveConfirm.addEventListener('click', function () {
+        let tags = [], id = idInput.value;
+        if (chips) chips.chipsData.forEach(item => tags.push(item.tag));
+
+        function commonErrorHandler(e) {
+            if (e.status === 403) {
+                docCookies.removeItem("passport");
+                window.location = '/manage';
+                return
+            }
+            M.toast({html: '无法保存' + idInput.value + ': ' + e.status})
+        }
+
+        if (target && id !== oldID) {
+            $.ajax({
+                url: '/manage?request=editor&operation=rename&old=' + oldID + '&new=' + id,
+                dataType: 'json',
+                success: write,
+                error: commonErrorHandler
+            })
+        } else write();
+
+        function write() {
+            $.ajax({
+                url: '/manage?request=editor&operation=write',
+                method: 'POST',
+                data: JSON.stringify({
+                    title: titleInput.value,
+                    id: id,
+                    category: categoryInput.value,
+                    tag: tags,
+                    article: cm.doc.getValue()
+                }),
+                success: function () {
+                    window.location = '/manage'
+                },
+                error: commonErrorHandler
+            })
+        }
+    });
+    let target, a = window.location.href.indexOf('target'), oldID;
+    let progressbar = document.getElementById('target-process');
+    if (a !== -1) {
+        let b = window.location.href.indexOf('&', a);
+        if (b === -1) {
+            target = window.location.href.substr(a).split('=')[1]
+        } else {
+            target = window.location.href.substring(a, b).split('=')[1]
+        }
+        fadeIn(progressbar);
+
+        function fetchContent() {
+            $.ajax({
+                url: '/blog/' + target.id + '/content.md',
+                success: function (r) {
+                    cm.doc.setValue(r)
+                },
+                error: function (e) {
+                    M.toast({html: '无法获取内容: ' + e.status})
+                }
+            })
+        }
+
+        $.ajax({
+            url: '/blog?request=header&id=' + target,
+            dataType: 'json',
+            success: function (data) {
+                target = data;
+                oldID = data.id;
+                fetchContent();
+                initContent()
+            },
+            error: function (e) {
+                M.toast({html: '服务器拒绝了我们的请求: ' + e.status});
+                target = undefined;
+                initContent()
+            }
+        })
+    } else {
+        initContent()
+    }
+
+    let attachmentModal = M.Modal.getInstance(document.getElementById('modal-attachment')),
+        btnConfirmInsert = document.getElementById('btn-confirm-insert'),
+        attachments = document.getElementById('attachments'),
+        attachment = Repeat.init(attachments);
+    let insertProgress = document.getElementById('insert-process');
+    attachment.model = `
+<div style="margin: 10px" class="waves-effect waves-light">
+    <img src="%path" height="100">
+    <p>%name</p>
+</div>
+    `;
+    let insertName;
+
+    function updateAttachments() {
+        insertProgress.style.opacity = '1';
+        insertProgress.style.display = null;
+        attachments.style.opacity = '0';
+
+        insertName = undefined;
+        attachment.clear();
+        attachment.beginUpdate();
+        const id = idInput.value;
+        $.ajax({
+            url: '/manage?request=editor&operation=attachment&id=' + id,
+            dataType: 'json',
+            success: function (r) {
+                if (Array.isArray(r)) {
+                    r.forEach(name => {
+                        attachment.push({path: '/blog/' + id + '/' + name, name: name}, undefined, false)
+                            .addEventListener('click', function (event) {
+                                insertName = name;
+                                const thisEle = event.target;
+                                thisEle.classList.add('red');
+                                attachment.elements.forEach(ele => {
+                                    if (ele !== thisEle) ele.classList.remove('red')
+                                })
+                            });
+                        attachment.endUpdate();
+                    })
+                }
+                fadeOut(insertProgress, () => {
+                    insertProgress.style.display = 'none';
+                    fadeIn(attachments)
+                })
+            },
+            error: function (e) {
+                M.toast({html: '无法刷新附件列表: ' + e.status})
+            }
+        });
+    }
+
+    btnInsert.addEventListener('click', () => {
+        updateAttachments();
+        attachmentModal.open()
+    });
+    btnConfirmInsert.addEventListener('click', function () {
+        if (insertName) {
+            const cursor = cm.doc.getCursor();
+            cm.doc.replaceRange('![' + insertName + '](' + insertName + ')', cursor);
+            attachmentModal.close();
+        }
+    });
+
+    function initContent() {
+        fadeIn(editor);
+        fadeOut(progressbar);
+        let btnSave = document.querySelector('.btn-floating'),
+            modalSave = M.Modal.getInstance(document.querySelector('#modal-save'));
+        if (!target) {
+            $.ajax({
+                url: '/manage?request=editor&operation=nextID',
+                success: function (r) {
+                    idInput.value = r;
+                    $('#id-process').hide();
+                    M.updateTextFields();
+                },
+                error: function (e) {
+                    M.Toast({html: '无法获取新ID: ' + e.status})
+                }
+            });
+            btnDelete.style.display = 'none';
+        } else {
+            titleInput.value = target.title;
+            idInput.value = target.id;
+            categoryInput.value = target.category;
+            $('#id-process').hide();
+            M.updateTextFields();
+        }
+
+        function initTag(options) {
+            if (target) {
+                options.data = [];
+                target.tag.forEach(tag => {
+                    options.data.push({tag: tag})
+                })
+            }
+            chips = M.Chips.init(document.querySelector('.chips'), options)
+        }
+
+        $.ajax({
+            url: '/blog?request=list',
+            dataType: 'json',
+            success: function (data) {
+                if (!Array.isArray(data))
+                    return;
+                let tags = {};
+                data.forEach(item => {
+                    item.tag.forEach(tag => {
+                        if (!tags.hasOwnProperty(tag))
+                            tags[tag] = null;
+                    })
+                });
+                initTag({
+                    autoCompleteOptions: {
+                        data: tags,
+                        limit: Infinity,
+                        minLength: 1
+                    },
+                    placeholder: '标签'
+                });
+            },
+            error: function (e) {
+                M.toast({html: '无法获取已有标签: ' + e.status});
+                initTag({placeholder: '标签'})
+            }
+        });
+        btnSave.addEventListener('click', function () {
+            modalSave.open();
+        });
+    }
+</script>
+</html>

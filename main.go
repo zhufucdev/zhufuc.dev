@@ -2,13 +2,18 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +26,7 @@ type Profile struct {
 	HttpsPort  int    `json:"https_port"`
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
+	NodeBin    string `json:"node_bin"`
 }
 
 type AttachedTo struct {
@@ -32,6 +38,13 @@ type AttachedTo struct {
 
 const profilePath string = "config.json"
 const constantsPath string = "site/shared/constants.json"
+const blogRoot string = "site/blog"
+
+func successJSON() map[string]int {
+	return map[string]int{
+		"result": 0,
+	}
+}
 
 func checkError(err error, guest string) bool {
 	if err != nil {
@@ -58,9 +71,14 @@ func homepage(w http.ResponseWriter, r *http.Request) {
 			responseFile(w, r.RequestURI[1:], false, r)
 			return
 		}
-		w.WriteHeader(404)
-		_, err := fmt.Fprintf(w, "没有这样的索引: %s", r.RequestURI)
-		checkError(err, r.RemoteAddr)
+		p := strings.Split(strings.Trim(r.RequestURI, "/"), "/")
+		if len(p) >= 1 && p[0] == "blog" {
+			blogPage(w, r)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			_, err := fmt.Fprintf(w, "没有这样的索引: %s", r.RequestURI)
+			checkError(err, r.RemoteAddr)
+		}
 	} else {
 		responseFile(w, "home.html", false, r)
 	}
@@ -91,14 +109,14 @@ func aboutPage(w http.ResponseWriter, r *http.Request) {
 				buff := new(bytes.Buffer)
 				_, err := buff.ReadFrom(r.Body)
 				if !checkError(err, r.RemoteAddr) {
-					w.WriteHeader(400)
+					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 				name := buff.String()
 
 				candidates, err := getCandidates()
 				if !checkError(err, r.RemoteAddr) {
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 					return
 				}
 				for _, candidate := range candidates {
@@ -113,13 +131,13 @@ func aboutPage(w http.ResponseWriter, r *http.Request) {
 				data := make(map[string]string)
 				err = json.NewDecoder(r.Body).Decode(&data)
 				if !checkError(err, r.RemoteAddr) {
-					w.WriteHeader(400)
+					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 				name, number := data["name"], data["number"]
 				candidates, err := getCandidates()
 				if !checkError(err, r.RemoteAddr) {
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 					return
 				}
 				for _, candidate := range candidates {
@@ -202,9 +220,7 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 						registeredManager[random] = expires
 						http.SetCookie(w, cookie)
 					}
-					err = encoder.Encode(map[string]int{
-						"result": 0,
-					})
+					err = encoder.Encode(successJSON())
 				} else {
 					if _, ok := blacklist[r.RemoteAddr]; !ok {
 						blacklist[r.RemoteAddr] = 0
@@ -217,7 +233,7 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 				checkError(err, r.RemoteAddr)
 			case "set":
 				if !isLogin(r) {
-					w.WriteHeader(403)
+					w.WriteHeader(http.StatusForbidden)
 					return
 				}
 				check := func(err error) bool {
@@ -250,7 +266,7 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 				}
 				// Set
 				jsonMap[what] = contents
-				// Write
+				// WriteToDisk
 
 				file, err = os.Create(constantsPath)
 				if !check(err) {
@@ -261,16 +277,159 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 				err = encoder.Encode(jsonMap)
 				if err != nil {
 					log.Printf("[manage] Failed to write changes from remote: %s", err)
-					w.WriteHeader(417)
+					w.WriteHeader(http.StatusExpectationFailed)
 				} else {
 					defer file.Close()
 					_, err = file.Write(buff.Bytes())
 					if err != nil {
 						log.Printf("[manage] Failed to write changes to disk: %s", err)
-						w.WriteHeader(417)
+						w.WriteHeader(http.StatusExpectationFailed)
 					} else {
 						w.WriteHeader(200)
 					}
+				}
+			case "editor":
+				if !isLogin(r) {
+					w.WriteHeader(http.StatusForbidden)
+					return
+				}
+				switch parse.Query().Get("operation") {
+				case "write":
+					var config map[string]interface{}
+					err := json.NewDecoder(r.Body).Decode(&config)
+					if !checkError(err, r.RemoteAddr) {
+						w.WriteHeader(http.StatusBadRequest)
+						return
+					}
+					now := time.Now()
+					header := BlogHeader{
+						Title:        fmt.Sprint(config["title"]),
+						ID:           fmt.Sprint(config["id"]),
+						Category:     fmt.Sprint(config["category"]),
+						LastModified: now.Unix(),
+					}
+					tagData := config["tag"].([]interface{})
+					tag := make([]string, len(tagData))
+					for index, v := range tagData {
+						tag[index] = v.(string)
+					}
+					header.Tag = tag
+					existence, _ := getBlog(header.ID)
+					if existence != nil {
+						// If there has been an existing header for this ID
+						// Use it's upload time
+						header.UploadTime = existence.UploadTime
+					} else {
+						// Otherwise, use now as upload time
+						header.UploadTime = now.Unix()
+					}
+					article := fmt.Sprint(config["article"])
+					err = header.WriteToDisk(article)
+					if err != nil {
+						log.Println("Failed to write blog:", err)
+						w.WriteHeader(http.StatusExpectationFailed)
+						return
+					}
+					err = json.NewEncoder(w).Encode(successJSON())
+					checkError(err, r.RemoteAddr)
+				case "nextID":
+					id, err := nextBlogID()
+					if !checkError(err, r.RemoteAddr) {
+						w.WriteHeader(http.StatusExpectationFailed)
+						return
+					}
+					_, err = fmt.Fprint(w, id)
+					checkError(err, r.RemoteAddr)
+				case "rename":
+					old, newID := parse.Query().Get("old"), parse.Query().Get("new")
+					if old == "" || newID == "" {
+						w.WriteHeader(http.StatusBadRequest)
+						return
+					}
+					old = filepath.Join(blogRoot, old)
+					newID = filepath.Join(blogRoot, newID)
+					err := os.Rename(old, newID)
+					if err != nil {
+						log.Println("Failed to rename", old, "to", newID+":", err)
+						w.WriteHeader(http.StatusExpectationFailed)
+						return
+					}
+					err = json.NewEncoder(w).Encode(map[string]int{
+						"result": 0,
+					})
+				case "delete":
+					id := parse.Query().Get("id")
+					if id == "" {
+						w.WriteHeader(http.StatusBadRequest)
+						return
+					}
+					err := os.RemoveAll(path.Join(blogRoot, id))
+					if err != nil {
+						log.Println("Could not delete", id+":", err)
+						if os.IsNotExist(err) {
+							w.WriteHeader(http.StatusNotFound)
+						} else {
+							w.WriteHeader(http.StatusExpectationFailed)
+						}
+						return
+					}
+					err = json.NewEncoder(w).Encode(successJSON())
+					checkError(err, r.RemoteAddr)
+				case "upload":
+					id, fileName := parse.Query().Get("id"), parse.Query().Get("name")
+					if id == "" || fileName == "" {
+						w.WriteHeader(http.StatusBadRequest)
+						return
+					}
+					dir := filepath.Join(blogRoot, id)
+					_, err := os.Stat(dir)
+					if err != nil {
+						w.WriteHeader(http.StatusNotFound)
+						return
+					}
+					f := filepath.Join(dir, fileName)
+					file, err := os.Create(f)
+					if err != nil {
+						log.Println("Failed to create file at", f+":", err)
+						w.WriteHeader(http.StatusExpectationFailed)
+						return
+					}
+					_, err = io.Copy(file, r.Body)
+					if !checkError(err, r.RequestURI) {
+						log.Println("Could not write", f+":", err)
+						w.WriteHeader(http.StatusExpectationFailed)
+					}
+					err = file.Close()
+					if err != nil {
+						log.Println("Failed to close", f+":", err)
+						w.WriteHeader(http.StatusExpectationFailed)
+					}
+					err = json.NewEncoder(w).Encode(successJSON())
+					checkError(err, r.RemoteAddr)
+				case "attachment":
+					id := parse.Query().Get("id")
+					if id == "" {
+						w.WriteHeader(http.StatusBadRequest)
+						return
+					}
+					attachments := make([]string, 0)
+					err := filepath.Walk(filepath.Join(blogRoot, id), func(p string, info os.FileInfo, err error) error {
+						if p == blogRoot || blogFileBlackList(info.Name()) {
+							return nil
+						}
+						if !info.IsDir() {
+							attachments = append(attachments, info.Name())
+						}
+						return nil
+					})
+					if err != nil {
+						w.WriteHeader(http.StatusExpectationFailed)
+						return
+					}
+					err = json.NewEncoder(w).Encode(attachments)
+					checkError(err, r.RemoteAddr)
+				default:
+					responseFile(w, "blogEdit.html", false, r)
 				}
 			}
 			return
@@ -283,9 +442,183 @@ func settingsPage(w http.ResponseWriter, r *http.Request) {
 	responseFile(w, "settings.html", false, r)
 }
 
-func redirect() http.HandlerFunc {
+type BlogHeader struct {
+	Title        string   `json:"title"`
+	ID           string   `json:"id"`
+	Category     string   `json:"category"`
+	Tag          []string `json:"tag"`
+	UploadTime   int64    `json:"upload_time"`
+	LastModified int64    `json:"last_modified"`
+}
+
+func (header BlogHeader) WriteToDisk(article string) error {
+	err := os.MkdirAll(path.Join(blogRoot, header.ID), os.ModePerm)
+	if err != nil {
+		log.Println("Could not mkdir for", header.ID+":", err)
+		return err
+	}
+	hPath, cPath := path.Join(blogRoot, header.ID, "header.json"), path.Join(blogRoot, header.ID, "content.md")
+	hFile, err := os.Create(hPath)
+	if err != nil {
+		log.Println("Could not open header for", header.ID+":", err)
+		return err
+	}
+	h := map[string]interface{}{
+		"title":         header.Title,
+		"category":      header.Category,
+		"tag":           header.Tag,
+		"upload_time":   header.UploadTime,
+		"last_modified": header.LastModified,
+	}
+	err = json.NewEncoder(hFile).Encode(h)
+	if err != nil {
+		return err
+	}
+	cFile, err := os.Create(cPath)
+	if err != nil {
+		return err
+	}
+	_, err = io.WriteString(cFile, article)
+	if err != nil {
+		return err
+	}
+	// Render Markdown
+	err = header.RenderMarkdown()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (header BlogHeader) RenderMarkdown() error {
+	rPath := path.Join(blogRoot, header.ID, "rendered.html")
+	render := exec.Command(profile.NodeBin + "/node")
+	render.Args = append(render.Args, "render.js")
+	render.Env = []string{"RENDER_TARGET=" + path.Join(blogRoot, header.ID)}
+	rendered, err := render.CombinedOutput()
+	if err != nil {
+		buff := bytes.NewBuffer(rendered)
+		fmt.Println(buff.String())
+		return err
+	}
+	rFile, err := os.Create(rPath)
+	if err != nil {
+		return err
+	}
+	_, err = rFile.Write(rendered)
+	if err != nil {
+		return err
+	}
+	_ = rFile.Close()
+	return nil
+}
+
+func nextBlogID() (string, error) {
+	sha := sha1.New()
+	_, err := fmt.Fprint(sha, strconv.FormatInt(time.Now().UnixNano(), 10))
+	if err != nil {
+		return "", err
+	}
+	sum := sha.Sum(nil)
+	result := ""
+	for _, v := range sum {
+		c := uint(v)%62 + 48
+		if c >= 58 {
+			c += 7
+			if c >= 91 {
+				c += 6
+			}
+		}
+		result += string(c)
+	}
+	return result, nil
+}
+func listBlog() ([]BlogHeader, error) {
+	headers := make([]BlogHeader, 0)
+	err := filepath.Walk(blogRoot, func(p string, info os.FileInfo, err error) error {
+		if info != nil && info.IsDir() && p != blogRoot {
+			header, _ := getBlog(info.Name())
+			if header != nil {
+				headers = append(headers, *header)
+			}
+		}
+		return nil
+	})
+	return headers, err
+}
+func getBlog(id string) (*BlogHeader, error) {
+	var header BlogHeader
+	joint := path.Join(blogRoot, id, "header.json")
+	file, err := os.Open(joint)
+	if err != nil {
+		log.Println("Could not open", joint+":", err)
+		return nil, err
+	}
+	err = json.NewDecoder(file).Decode(&header)
+	if err != nil {
+		log.Println("Could not decode json for", joint+":", err)
+		return nil, err
+	}
+	header.ID = id
+	return &header, nil
+}
+
+func blogPage(w http.ResponseWriter, r *http.Request) {
+	if len(r.URL.Query()) > 0 {
+		switch r.URL.Query().Get("request") {
+		case "list":
+			headers, err := listBlog()
+			if !checkError(err, r.RemoteAddr) {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			err = json.NewEncoder(w).Encode(headers)
+			if !checkError(err, r.RemoteAddr) {
+				w.WriteHeader(http.StatusExpectationFailed)
+				return
+			}
+			checkError(err, r.RemoteAddr)
+		case "header":
+			id := r.URL.Query().Get("id")
+			if id == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			header, err := getBlog(id)
+			if err != nil || header == nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			err = json.NewEncoder(w).Encode(header)
+			checkError(err, r.RemoteAddr)
+		}
+		return
+	}
+	split := strings.Split(strings.Trim(r.RequestURI, "/"), "/")
+	if len(split) > 1 {
+		if len(split) == 2 {
+			if strings.HasSuffix(r.RequestURI, "/") {
+				responseFile(w, filepath.Join("blog", split[1], "rendered.html"), false, r)
+			} else {
+				redirect(r.RequestURI+"/")(w, r)
+			}
+			return
+		} else if blogFileBlackList(split[2]) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		responseFile(w, filepath.Join("blog", split[1], split[2]), false, r)
+	}
+	responseFile(w, "blog.html", false, r)
+}
+
+func blogFileBlackList(name string) bool {
+	return name == "header.json" || name == "rendered.html"
+}
+
+func redirect(uri string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://"+r.Host+r.URL.String()+uri, http.StatusMovedPermanently)
 	}
 }
 
@@ -310,9 +643,28 @@ func main() {
 		http.HandleFunc("/about", aboutPage)
 		http.HandleFunc("/manage", managePage)
 		http.HandleFunc("/settings", settingsPage)
+		http.HandleFunc("/blog", blogPage)
+		// Process markdown render
+		for _, v := range os.Environ() {
+			if v == "RERENDER_MARKDOWN=true" {
+				headers, err := listBlog()
+				if err != nil {
+					log.Println("Failed to render markdown:", err)
+					break
+				}
+				for _, h := range headers {
+					err = h.RenderMarkdown()
+					if err != nil {
+						log.Println("Failed to render markdown for", h.ID+":", err)
+					}
+				}
+				break
+			}
+		}
+
 		if profile.HttpsPort != -1 {
 			log.Println("HTTPS listen on port", profile.HttpsPort)
-			go http.ListenAndServe(":"+strconv.FormatInt(int64(80), 10), redirect())
+			go http.ListenAndServe(":"+strconv.FormatInt(int64(80), 10), redirect(""))
 			log.Fatal(http.ListenAndServeTLS(":"+strconv.FormatInt(int64(profile.HttpsPort), 10), profile.PublicKey, profile.PrivateKey, nil))
 		} else {
 			log.Println("Listen on port", profile.Port)

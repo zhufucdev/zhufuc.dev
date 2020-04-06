@@ -136,59 +136,6 @@ let ContentViewer = {};
                 }
             };
 
-            function measure(ele, considerScroll) {
-                let x = 0, y = 0, test = ele;
-                while (test !== document.body && test != null) {
-                    y += test.offsetTop;
-                    x += test.offsetLeft;
-                    test = test.offsetParent;
-                }
-                let html = document.querySelector('html');
-                if (considerScroll !== false) {
-                    y -= html.scrollTop;
-                    x -= html.scrollLeft;
-                }
-                return {
-                    x: x,
-                    y: y,
-                    height: ele.clientHeight,
-                    width: ele.clientWidth
-                }
-
-            }
-
-            function moveClone(ele, from, to, prepare, end) {
-                function update(v) {
-                    ele.style.left = (to.x - from.x) * v + from.x + 'px';
-                    ele.style.top = (to.y - from.y) * v + from.y + 'px';
-                    ele.style.width = (to.width - from.width) * v + from.width + 'px';
-                    ele.style.height = (to.height - from.height) * v + from.height + 'px';
-                }
-
-                ele = clone(ele, true);
-                ele.style.position = 'fixed';
-                update(0);
-                ele.style.display = ele.style.opacity = null;
-
-                if (typeof prepare === "function") prepare();
-
-                let animator = new ObjectAnimator(0, 1);
-                animator.addUpdateListener(update);
-                animator.doOnEnd(() => {
-                    if (typeof end === "function") end()
-                    ele.remove();
-                });
-                animator.start();
-            }
-
-            function clone(ele, hide) {
-                let result = ele.cloneNode(true);
-                if (hide === true) result.style.display = 'none';
-                document.body.insertAdjacentElement('beforeend', result);
-                result.style.zIndex = '1002';
-                return result;
-            }
-
             this.show = () => {
                 if (this.isMoving) return;
                 this.$showCard();

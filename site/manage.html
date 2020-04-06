@@ -30,49 +30,60 @@
 </div>
 <div class="control-panel row"
      style="display: none; position: absolute; top: 20px;width: 100%;">
-    <div class="col s12 m6">
-        <div class="card">
-            <div class="card-content">
-                <span class="card-title">常量</span>
-                <div class="row">
-                    <div class="input-field col s10">
-                        <input type="number" id="height-input">
-                        <label for="height-input">身高</label>
+    <ul class="tabs tabs-transparent no-autoinit">
+        <li class="tab"><a href="#control-panel">控制面板</a></li>
+        <li class="tab"><a href="#blog">博客</a></li>
+    </ul>
+    <div id="control-panel">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">常量</span>
+                    <div class="row">
+                        <div class="input-field col s10">
+                            <input type="number" id="height-input">
+                            <label for="height-input">身高</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <input type="text" id="height-unit-input">
+                            <label for="height-unit-input">单位</label>
+                        </div>
                     </div>
-                    <div class="input-field col s2">
-                        <input type="text" id="height-unit-input">
-                        <label for="height-unit-input">单位</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s10">
-                        <input type="number" id="weight-input">
-                        <label for="weight-input">体重</label>
-                    </div>
-                    <div class="input-field col s2">
-                        <input type="text" id="weight-unit-input">
-                        <label for="weight-unit-input">单位</label>
+                    <div class="row">
+                        <div class="input-field col s10">
+                            <input type="number" id="weight-input">
+                            <label for="weight-input">体重</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <input type="text" id="weight-unit-input">
+                            <label for="weight-unit-input">单位</label>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">经历</span>
+                    <div id="events"></div>
+                    <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-event"><i
+                            class="material-icons">add</i> </a>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <div class="card-content">
-                <span class="card-title">经历</span>
-                <div id="events"></div>
-                <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-event"><i
-                        class="material-icons">add</i> </a>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">能力</span>
+                    <div id="ability" class="no-search-bar"></div>
+                    <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-ability"><i
+                            class="material-icons">add</i> </a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col s12 m6">
-        <div class="card">
-            <div class="card-content">
-                <span class="card-title">能力</span>
-                <div id="ability" class="no-search-bar"></div>
-                <a class="btn-floating btn-large waves-effect waves-light right" id="btn-add-ability"><i
-                        class="material-icons">add</i> </a>
-            </div>
+    <div id="blog" style="padding: 30px">
+        <div class="fixed-action-btn">
+            <a class="btn-floating btn-large waves-effect waves-light" id="blog-add"><i class="material-icons">add</i></a>
         </div>
     </div>
 </div>
@@ -416,6 +427,61 @@
             syncEventsLocally();
         }
 
+        // Blog
+        let blog = Repeat.init(document.getElementById('blog'));
+        blog.model = `
+<div class="col s12 m4">
+    <div class="waves-effect card">
+        <div class="card-content">
+            <span class="card-title">%title</span>
+            <p>%id</p>
+            <p>上传于%upload_time</p>
+            <p>最近一次修改于%last_modified</p>
+        </div>
+    </div>
+</div>
+        `;
+        blog.categoryBuilder = (ele) => ele.setAttribute('class', 'row');
+        function syncBlog() {
+            blog.clear();
+            $.ajax({
+                url: '/blog?request=list',
+                dataType: 'json',
+                success: function (r) {
+                    if (Array.isArray(r)) {
+                        blog.beginUpdate();
+                        r.forEach(header => {
+                            blog.push({
+                                title: header.title,
+                                id: header.id,
+                                upload_time: formatDate(new Date(header["upload_time"] * 1000)),
+                                last_modified: formatDate(new Date(header["last_modified"] * 1000))
+                            }, header.category, false).addEventListener('click', function () {
+                                window.location = '/manage?request=editor&target=' + header.id;
+                            })
+                        });
+                        blog.endUpdate();
+                    } else {
+                        M.Toast({html: '博客服务器返回了无效数据'})
+                    }
+                },
+                error: function (e) {
+                    M.Toast({html: '博客服务器拒绝了我们的请求: ' + e.status})
+                }
+            })
+        }
+        syncBlog();
+        document.getElementById('blog-add').addEventListener('click', function () {
+            let animator = new ObjectAnimator(0, 1);
+            animator.addUpdateListener(v => {
+                cp.style.transform = 'translateX(' + -v * window.innerWidth + 'px)';
+                cp.style.opacity = (1 - v).toString();
+            });
+            animator.doOnEnd(() => window.location = '/manage?request=editor');
+            animator.duration = 300;
+            animator.start();
+        });
+
         // Constants
         function listenChanges() {
             function generateValueInput(name) {
@@ -456,7 +522,9 @@
                 M.toast({html: "无法获得常量：" + r.status});
                 listenChanges();
             }
-        })
+        });
+
+        M.Tabs.init(document.querySelector('.tabs'));
     }
 
     function initLoginPanel() {

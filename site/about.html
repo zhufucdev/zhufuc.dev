@@ -12,6 +12,7 @@
     <script src="/shared/repeater.js"></script>
     <script src="/shared/utility.js"></script>
     <script src="/shared/settings.js"></script>
+    <script src="/shared/splash.js"></script>
 </head>
 <style>
     p i {
@@ -79,6 +80,7 @@
             </div>
         </li>
         <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目</a></li>
+        <li><a class="waves-effect" href="blog"><i class="material-icons">collections_bookmark</i>博客</a></li>
         <li><a class="selected-item waves-effect"><i class="material-icons">error</i>关于</a></li>
         <li><a class="waves-effect" href="settings"><i class="material-icons">settings</i>设置</a></li>
     </ul>
@@ -295,30 +297,32 @@
         $('#browser-not-supported').show()
     }
     animateTitle('关于');
-    $(document).ready(() => {
-        let tabs = document.querySelector('.tabs');
-        tabs.style.display = null;
-        M.AutoInit();
+    checkWelcomeSplash();
+    let tabs = document.querySelector('.tabs');
+    tabs.style.display = null;
+    M.AutoInit();
+    if (!extendToolbarPages.includes(Settings.lastPage)) {
         let animator = new ObjectAnimator(0, tabs.clientHeight);
         animator.addUpdateListener(v => tabs.style.height = v + "px");
         animator.doOnEnd(() => tabs.style.height = null);
         animator.start();
+    }
+    let basis = document.querySelector('#basis');
 
-        let basis = document.querySelector('#basis');
-        setTimeout(() => {
-            for (let i = 0; i < basis.children.length; i++) {
-                let item = basis.children.item(i);
-                item.style.opacity = '0';
-                setTimeout(() => {
-                    let animator = new ObjectAnimator(0, 1);
-                    animator.duration = 300;
-                    animator.addUpdateListener(v => item.style.opacity = v.toString());
-                    animator.start()
-                }, i * 120)
-            }
-            document.querySelector('.container').style.display = null;
-        }, 500);
-    });
+    setTimeout(() => {
+        for (let i = 0; i < basis.children.length; i++) {
+            let item = basis.children.item(i);
+            item.style.opacity = '0';
+            setTimeout(() => {
+                let animator = new ObjectAnimator(0, 1);
+                animator.duration = 300;
+                animator.addUpdateListener(v => item.style.opacity = v.toString());
+                animator.start()
+            }, i * 120)
+        }
+        document.querySelector('.container').style.display = null;
+    }, 500);
+    Settings.lastPage = "about";
 
     function expandable(btn, toBeExpanded) {
         btn.onclick = () => {

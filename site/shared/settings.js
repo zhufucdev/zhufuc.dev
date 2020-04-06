@@ -102,6 +102,16 @@ var Settings = {};
             }
         });
     };
+    // The following string is used as id for pages
+    // home, blog, about, settings
+    Object.defineProperty(Settings, 'lastPage', {
+        get() {
+            return Settings.createPreference('lastPage', 'home').value
+        },
+        set(v) {
+            Settings.createPreference('lastPage').value = v
+        }
+    })
 })();
 
 

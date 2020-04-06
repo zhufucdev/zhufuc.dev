@@ -12,6 +12,7 @@
     <script src="/shared/repeater.js"></script>
     <script src="/shared/utility.js"></script>
     <script src="/shared/settings.js"></script>
+    <script src="/shared/splash.js"></script>
 </head>
 <style>
     .collection-item p {
@@ -45,7 +46,7 @@
             <li class="collection-item avatar">
                 <i class="material-icons circle">card_giftcard</i>
                 <span class="title">不显示欢迎动画</span>
-                <p>不在主页播放欢迎动画</p>
+                <p>不在某个页面播放欢迎动画</p>
                 <p>每次播放后自动开启</p>
                 <div class="switch control" data-target="splash">
                     <label>
@@ -82,15 +83,18 @@
         </div>
     </li>
     <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目</a></li>
+    <li><a class="waves-effect" href="blog"><i class="material-icons">collections_bookmark</i>博客</a></li>
     <li><a class="waves-effect" href="about"><i class="material-icons">error</i>关于</a></li>
     <li><a class="selected-item waves-effect"><i class="material-icons">settings</i>设置</a> </li>
 </ul>
 </body>
 <script>
+    Settings.lastPage = 'settings';
     animateTitle('设置');
     if (!checkBrowser()) {
         $('#browser-not-supported').show()
     }
+    checkWelcomeSplash();
     M.AutoInit();
     Settings.autoInit();
 </script>

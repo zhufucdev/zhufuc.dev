@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>zhufucdev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/shared/materialize.css">
+    <link rel="stylesheet" href="/shared/material-icons.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/shared/hljs-androidstudio.css">
+    <script src="/shared/jquery-3.4.1.js"></script>
+    <script src="/shared/materialize.js"></script>
+    <script src="/shared/repeater.js"></script>
+    <script src="/shared/utility.js"></script>
+    <script src="/shared/settings.js"></script>
+    <script src="/shared/splash.js"></script>
+    <script src="/shared/markdown-it.js"></script>
+    <script src="/shared/highlight.js"></script>
+</head>
+<body>
+<main>
+    <div class="navbar-fixed" style="height: 112px">
+        <nav class="nav-extended">
+            <div class="nav-wrapper">
+                <a class="brand-logo">zhufucdev</a>
+                <a class="hide-on-large-only left sidenav-trigger" style="margin-left: 12px" data-target="main-sidenav"
+                   href="#"><i class="material-icons">menu</i></a>
+            </div>
+            <div class="nav-content">
+                <ul class="tabs tabs-transparent no-autoinit" style="display: none"></ul>
+            </div>
+        </nav>
+    </div>
+    <div style="width: 100%; display: none" class="deep-orange row" id="browser-not-supported">
+        <span class="white-text col">您的浏览器似乎并不支持ECMAScript 2015或自定义标签的特性，故无法显示某些内容</span>
+        <i class="material-icons white-text col right waves-effect" onclick="$(this).parent().hide()">close</i>
+    </div>
+    <ul class="sidenav sidenav-fixed" id="main-sidenav">
+        <li>
+            <div class="user-view">
+                <div class="background blue"></div>
+                <a><img src="/shared/face.png" class="circle"></a>
+                <a><span class="white-text name">zhufucdev</span> </a>
+                <a><span class="white-text email">An individual developer for Java and C#</span> </a>
+            </div>
+        </li>
+        <li><a class="waves-effect" href="/"><i class="material-icons">build</i>项目</a></li>
+        <li><a class="waves-effect selected-item"><i class="material-icons">collections_bookmark</i>博客</a></li>
+        <li><a class="waves-effect" href="/about"><i class="material-icons">error</i>关于</a></li>
+        <li><a class="waves-effect" href="/settings"><i class="material-icons">settings</i>设置</a></li>
+    </ul>
+    <div class="container">
+    </div>
+</main>
+</body>
+<script>
+    if (!checkBrowser()) {
+        document.getElementById('browser-not-supported').style.display = null;
+    }
+    checkWelcomeSplash();
+    animateTitle('博客');
+    let tabs = document.querySelector('.tabs');
+    tabs.style.display = null;
+    M.AutoInit();
+    if (!extendToolbarPages.includes(Settings.lastPage)) {
+        let animator = new ObjectAnimator(0, tabs.clientHeight);
+        animator.addUpdateListener(v => tabs.style.height = v + "px");
+        animator.doOnEnd(() => tabs.style.height = null);
+        animator.start();
+    }
+    Settings.lastPage = 'blog';
+
+    let container = document.querySelector('.container');
+    let model = `
+<div class="col s12 m4">
+    <div class="card waves-effect">
+    <div class="card-content">
+        <span class="card-title">%title</span>
+        <p>%date</p>
+        <p style="line-height: 30px"><i class="material-icons" style="vertical-align: middle">label</i> %tag</p>
+    </div>
+</div>
+</div>
+    `;
+
+    function list(data) {
+        let knownTags = {}, containers = {};
+        data.forEach(header => {
+            if (!containers[header.category]) {
+                let categoryHolder = document.createElement('div');
+                categoryHolder.id = header.category;
+                container.appendChild(categoryHolder);
+                let r = Repeat.init(categoryHolder);
+                r.model = model;
+                r.contentElement.setAttribute('class', 'row');
+                r.beginUpdate();
+                containers[header.category] = r;
+
+                knownTags[header.category] = [];
+
+                let tab = document.createElement('li');
+                tab.setAttribute('class', 'tab');
+                let a = document.createElement('a');
+                a.href = '#' + header.category;
+                a.textContent = header.category;
+                tab.appendChild(a);
+                tabs.appendChild(tab);
+            }
+            let date = new Date(header["last_modified"] * 1000);
+            let tag;
+            if (header.tag.length > 0) {
+                function add(tag) {
+                    if (!knownTags[header.category].includes(tag)) {
+                        knownTags[header.category].push(tag)
+                    }
+                }
+
+                tag = header.tag[0];
+                add(tag);
+                for (let i = 1; i < header.tag.length; i++) {
+                    tag += " " + header.tag[i];
+                    add(header.tag[i])
+                }
+            }
+            let element = containers[header.category].push({
+                title: header.title,
+                date: formatDate(date),
+                tag: tag
+            }, undefined);
+            element.tag = header.tag;
+            element.addEventListener('click', headBlog(header, element));
+        });
+        function headBlog(header, ele) {
+            let id = header.id, repeater = containers[header.category];
+            return function () {
+                ele.firstElementChild.classList.remove('waves-effect');
+                const A = measure(ele, true);
+                const container = ele.parentElement;
+                const B = measure(container, true);
+                B.height = A.height;
+                B.y = 128;
+                ele.style.opacity = '0';
+                fadeOut(repeater.contentElement);
+                moveClone(ele, A, B, undefined, () => window.location = '/blog/' + id + '/');
+            }
+        }
+        for (let category in containers) {
+            let chipHolder = document.createElement('div');
+            let selectedTags = [];
+            knownTags[category].forEach((tag, index) => {
+                let ele = document.createElement('div');
+                ele.setAttribute('class', 'chip');
+                ele.textContent = tag;
+
+                function animate(v) {
+                    ele.style.transform = 'translateX(-' + (1 - v) * 30 + 'px)';
+                    ele.style.opacity = v.toString();
+                }
+                animate(0);
+
+                ele.addEventListener('click', function () {
+                    if (selectedTags.includes(tag)) {
+                        ele.setAttribute('class', 'chip');
+                        selectedTags.splice(selectedTags.indexOf(tag), 1)
+                    } else {
+                        selectedTags.push(tag);
+                        ele.setAttribute('class', 'chip green')
+                    }
+                    filter(selectedTags, containers[category])
+                });
+
+                chipHolder.appendChild(ele);
+
+                setTimeout(() => {
+                    let animator = new ObjectAnimator(0, 1);
+                    animator.addUpdateListener(animate);
+                    animator.duration = 300;
+                    animator.doOnEnd(() => {
+                        ele.style.transform = ele.style.opacity = null;
+                    });
+                    animator.start()
+                }, index * 60)
+            });
+            let r = containers[category];
+            r.contentElement.insertAdjacentElement('afterbegin', chipHolder);
+            r.endUpdate();
+        }
+
+        function filter(tags, repeater) {
+            if (tags.length === 0) {
+                repeater.elements.forEach(ele => {
+                    ele.show();
+                })
+            } else {
+                repeater.elements.forEach(ele => {
+                    for (let i in tags) {
+                        if (ele.tag.includes(tags[i])) {
+                            ele.show();
+                            return;
+                        }
+                    }
+                    ele.hide();
+                })
+            }
+        }
+
+        M.Tabs.init(tabs);
+    }
+
+    $.ajax({
+        url: '/blog?request=list',
+        dataType: 'json',
+        success: list
+    })
+</script>
+</html>

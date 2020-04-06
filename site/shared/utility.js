@@ -1,5 +1,7 @@
 // Utilities library by zhufucdev
 // Licenced under the GPL version 3
+
+let extendToolbarPages = ['blog', 'about'];
 /**
  * Checks the compatibility of user's browser.
  * @return {boolean} true if the browser is compatible with the site.
@@ -128,4 +130,69 @@ function fadeSwitch(ele, newHTML) {
 
 function isWideScreen() {
     return window.innerWidth >= 993
+}
+
+function checkWelcomeSplash() {
+    let splashPreference = Settings.createPreference('splash', false);
+    if (!splashPreference.value) {
+        document.body.insertAdjacentElement('afterbegin', document.createElement('splash-screen'));
+        splashPreference.value = true;
+    }
+}
+
+function formatDate(date) {
+    return  date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + (date.getDay() + 1) + " " +
+    date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+}
+// The following three functions implements shared element translation.
+function moveClone(ele, from, to, prepare, end) {
+    function update(v) {
+        ele.style.left = (to.x - from.x) * v + from.x + 'px';
+        ele.style.top = (to.y - from.y) * v + from.y + 'px';
+        ele.style.width = (to.width - from.width) * v + from.width + 'px';
+        ele.style.height = (to.height - from.height) * v + from.height + 'px';
+    }
+
+    ele = clone(ele, true);
+    ele.style.position = 'fixed';
+    update(0);
+    ele.style.display = ele.style.opacity = null;
+
+    if (typeof prepare === "function") prepare();
+
+    let animator = new ObjectAnimator(0, 1);
+    animator.addUpdateListener(update);
+    animator.doOnEnd(() => {
+        if (typeof end === "function") end();
+        ele.remove();
+    });
+    animator.start();
+}
+
+function clone(ele, hide) {
+    let result = ele.cloneNode(true);
+    if (hide === true) result.style.display = 'none';
+    document.body.insertAdjacentElement('beforeend', result);
+    result.style.zIndex = '1002';
+    return result;
+}
+
+function measure(ele, considerScroll) {
+    let x = 0, y = 0, test = ele;
+    while (test !== document.body && test != null) {
+        y += test.offsetTop;
+        x += test.offsetLeft;
+        test = test.offsetParent;
+    }
+    let html = document.querySelector('html');
+    if (considerScroll !== false) {
+        y -= html.scrollTop;
+        x -= html.scrollLeft;
+    }
+    return {
+        x: x,
+        y: y,
+        height: ele.clientHeight,
+        width: ele.clientWidth
+    }
 }
