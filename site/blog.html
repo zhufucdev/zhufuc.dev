@@ -141,7 +141,7 @@
                 B.y = 128;
                 ele.style.opacity = '0';
                 fadeOut(repeater.contentElement);
-                moveClone(ele, A, B, undefined, () => window.location = '/blog/' + id + '/');
+                moveClone(ele, A, B, undefined, () => window.location = '/blog/' + id + '/', true);
             }
         }
         for (let category in containers) {

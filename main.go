@@ -383,9 +383,12 @@ func managePage(w http.ResponseWriter, r *http.Request) {
 					}
 					dir := filepath.Join(blogRoot, id)
 					_, err := os.Stat(dir)
-					if err != nil {
-						w.WriteHeader(http.StatusNotFound)
-						return
+					if err != nil && os.IsNotExist(err) {
+						err = os.MkdirAll(dir, os.ModePerm)
+						if err != nil {
+							w.WriteHeader(http.StatusForbidden)
+							return
+						}
 					}
 					f := filepath.Join(dir, fileName)
 					file, err := os.Create(f)

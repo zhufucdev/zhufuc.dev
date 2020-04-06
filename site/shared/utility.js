@@ -145,7 +145,7 @@ function formatDate(date) {
     date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 }
 // The following three functions implements shared element translation.
-function moveClone(ele, from, to, prepare, end) {
+function moveClone(ele, from, to, prepare, end, keep) {
     function update(v) {
         ele.style.left = (to.x - from.x) * v + from.x + 'px';
         ele.style.top = (to.y - from.y) * v + from.y + 'px';
@@ -164,7 +164,7 @@ function moveClone(ele, from, to, prepare, end) {
     animator.addUpdateListener(update);
     animator.doOnEnd(() => {
         if (typeof end === "function") end();
-        ele.remove();
+        if (keep !== true) ele.remove();
     });
     animator.start();
 }
