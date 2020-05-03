@@ -45,6 +45,13 @@
     .card {
         width: 100%;
     }
+
+    .icon {
+        height: 23px;
+        vertical-align: middle;
+        line-height: 23px;
+        text-align: center;
+    }
 </style>
 <body>
 <main>
@@ -62,6 +69,7 @@
                     <li class="tab"><a href="#events">经历</a></li>
                     <li class="tab experiment" id="experiment-tab" style="display: none"><a href="#experiment">实验性</a>
                     </li>
+                    <li class="tab"><a href="#site">网站</a></li>
                 </ul>
             </div>
         </nav>
@@ -74,7 +82,7 @@
         <li>
             <div class="user-view">
                 <div class="background blue"></div>
-                <a><img src="shared/face.png" class="circle"></a>
+                <a><img src="shared/face.webp" class="circle"></a>
                 <a><span class="white-text name">zhufucdev</span> </a>
                 <a><span class="white-text email">An individual developer for Java and C#</span> </a>
             </div>
@@ -189,17 +197,6 @@
                             <p><i class="material-icons">tv</i><span>6.67" 2400×1080px @ 120Hz</span></p>
                         </div>
                         <p>
-                            <i class="material-icons">phone_iphone</i><span>iPhone 6</span>
-                            <a id="btn-iphone-collection" href="#" style="position: absolute; right: 10px"><i
-                                    class="material-icons black-text">expand_more</i></a>
-                        </p>
-                        <div class="iphone-collection level-2" style="display: none">
-                            <p><i class="material-icons">memory</i><span>Apple A9</span></p>
-                            <p><i class="material-icons">memory</i><span>1GB</span></p>
-                            <p><i class="material-icons">memory</i><span>PowerVR GX6450</span></p>
-                            <p><i class="material-icons">tv</i><span>4.7" 1334×710px</span></p>
-                        </div>
-                        <p>
                             <i class="material-icons">watch</i><span>小米手环4</span>
                             <a id="btn-band-collection" href="#" style="position: absolute; right: 10px"><i
                                     class="material-icons black-text">expand_more</i></a>
@@ -252,6 +249,86 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div id="site">
+            <div class="card">
+                <div class="card-content">
+                    <div class="row" style="margin-bottom: auto">
+                        <img src="/shared/project-icons/languages/go.png" class="col icon">
+                        <span class="card-title">基于Go的服务器</span>
+                    </div>
+                    <span class="red-text small">使用的第三方库</span>
+                    <ul class="collection">
+                        <li class="collection-item avatar">
+                            <span class="circle blue white-text circle-mdi">U</span>
+                            <span class="title">UUID</span>
+                            <p><i class="material-icons">copyright</i>BSD 3-Clause<br>
+                                <i class="material-icons">account_circle</i>Google
+                            </p>
+                            <a class="secondary-content" href="https://github.com/google/uuid">
+                                <i class="material-icons">link</i>
+                            </a>
+                        </li>
+                    </ul>
+                    <span class="red-text small">提供商</span>
+                    <ul class="collection">
+                        <li class="collection-item avatar">
+                            <img src="/shared/external/Vultr-logo.png" class="circle light-green white-text circle-mdi"
+                                style="padding: 10px">
+                            <span class="title">Vultr</span>
+                            <p><i class="material-icons">domain</i>Vultr<br>
+                                <i class="material-icons">account_circle</i>David Aninowsky
+                            </p>
+                            <a class="secondary-content" href="https://vultr.com">
+                                <i class="material-icons">link</i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="row" style="margin-bottom: auto">
+                        <img src="/shared/project-icons/languages/html.png" class="col icon">
+                        <span class="card-title">网页</span>
+                    </div>
+                    <span class="red-text small">使用的第三方库</span>
+                    <ul class="collection">
+                        <li class="collection-item avatar">
+                            <img src="/shared/external/materialize.svg" class="circle grey white-text circle-mdi"
+                                 style="padding: 10px">
+                            <span class="title">Materialize</span>
+                            <p><i class="material-icons">copyright</i>MIT<br>
+                                <i class="material-icons">account_circle</i>Dogfalo
+                            </p>
+                            <a class="secondary-content" href="https://materializecss.com">
+                                <i class="material-icons">link</i>
+                            </a>
+                        </li>
+                        <li class="collection-item avatar">
+                            <img src="/shared/external/jQuery-logo.png" class="circle red white-text circle-mdi"
+                                 style="padding: 10px">
+                            <span class="title">jQuery</span>
+                            <p><i class="material-icons">copyright</i>MIT<br>
+                                <i class="material-icons">account_circle</i>OpenJS Foundation
+                            </p>
+                            <a class="secondary-content" href="https://jquery.com">
+                                <i class="material-icons">link</i>
+                            </a>
+                        </li>
+                        <li class="collection-item avatar">
+                            <span class="circle orange white-text circle-mdi">M</span>
+                            <span class="title">markdown-it</span>
+                            <p><i class="material-icons">copyright</i>MIT<br>
+                                <i class="material-icons">account_circle</i>markdown-it
+                            </p>
+                            <a class="secondary-content" href="https://github.com/markdown-it/markdown-it">
+                                <i class="material-icons">link</i>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -352,7 +429,6 @@
 
     expandable(document.getElementById('btn-family-collection'), document.querySelector('.family-collection'));
     expandable(document.getElementById('btn-pc-collection'), document.querySelector('.pc-collection'));
-    expandable(document.getElementById('btn-iphone-collection'), document.querySelector('.iphone-collection'));
     expandable(document.getElementById('btn-phone-collection'), document.querySelector('.phone-collection'));
     expandable(document.getElementById('btn-band-collection'), document.querySelector('.band-collection'));
     expandable(document.getElementById('btn-video-expand'), document.getElementById('expanding-video'));

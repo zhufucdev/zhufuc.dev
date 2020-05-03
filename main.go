@@ -611,6 +611,7 @@ func blogPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		responseFile(w, filepath.Join("blog", split[1], split[2]), false, r)
+		return
 	}
 	responseFile(w, "blog.html", false, r)
 }

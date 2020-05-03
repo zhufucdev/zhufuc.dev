@@ -80,7 +80,7 @@ var Settings = {};
     Settings.createPreference = (id, defaultValue) => {
         if (!docCookies.hasItem(id) || !docCookies.getItem(id).includes(':')) {
             docCookies.setItem(id, (typeof defaultValue === 'boolean' ? 'checkbox:' : 'text:') + defaultValue,
-                magicDate())
+                magicDate(), '/')
         }
         return new Preference(id)
     };

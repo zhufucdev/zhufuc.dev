@@ -10,7 +10,7 @@ class Splash extends HTMLElement {
         let icons = document.createElement('div');
         icons.setAttribute('class', 'icons');
         let face = document.createElement('img');
-        face.setAttribute('src', '/shared/face.png');
+        face.setAttribute('src', '/shared/face.webp');
         face.setAttribute('class', 'face');
         let particles = document.createElement('img');
         particles.setAttribute("src", 'shared/particles.svg');

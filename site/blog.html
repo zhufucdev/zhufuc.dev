@@ -39,7 +39,7 @@
         <li>
             <div class="user-view">
                 <div class="background blue"></div>
-                <a><img src="/shared/face.png" class="circle"></a>
+                <a><img src="/shared/face.webp" class="circle"></a>
                 <a><span class="white-text name">zhufucdev</span> </a>
                 <a><span class="white-text email">An individual developer for Java and C#</span> </a>
             </div>
@@ -59,13 +59,13 @@
     }
     checkWelcomeSplash();
     animateTitle('博客');
-    let tabs = document.querySelector('.tabs');
-    tabs.style.display = null;
+    let tabEle = document.querySelector('.tabs');
+    tabEle.style.display = null;
     M.AutoInit();
     if (!extendToolbarPages.includes(Settings.lastPage)) {
-        let animator = new ObjectAnimator(0, tabs.clientHeight);
-        animator.addUpdateListener(v => tabs.style.height = v + "px");
-        animator.doOnEnd(() => tabs.style.height = null);
+        let animator = new ObjectAnimator(0, tabEle.clientHeight);
+        animator.addUpdateListener(v => tabEle.style.height = v + "px");
+        animator.doOnEnd(() => tabEle.style.height = null);
         animator.start();
     }
     Settings.lastPage = 'blog';
@@ -104,7 +104,7 @@
                 a.href = '#' + header.category;
                 a.textContent = header.category;
                 tab.appendChild(a);
-                tabs.appendChild(tab);
+                tabEle.appendChild(tab);
             }
             let date = new Date(header["last_modified"] * 1000);
             let tag;
@@ -130,6 +130,7 @@
             element.tag = header.tag;
             element.addEventListener('click', headBlog(header, element));
         });
+
         function headBlog(header, ele) {
             let id = header.id, repeater = containers[header.category];
             return function () {
@@ -144,6 +145,7 @@
                 moveClone(ele, A, B, undefined, () => window.location = '/blog/' + id + '/', true);
             }
         }
+
         for (let category in containers) {
             let chipHolder = document.createElement('div');
             let selectedTags = [];
@@ -156,6 +158,7 @@
                     ele.style.transform = 'translateX(-' + (1 - v) * 30 + 'px)';
                     ele.style.opacity = v.toString();
                 }
+
                 animate(0);
 
                 ele.addEventListener('click', function () {
@@ -204,7 +207,15 @@
             }
         }
 
-        M.Tabs.init(tabs);
+        let tabs = M.Tabs.init(tabEle, {
+            onShow: function () {
+                let present = new Date();
+                docCookies.setItem("blogTab", tabs.index, new Date(present.getFullYear(), present.getMonth(), present.getDate() + 1))
+            }
+        });
+        if (Settings.createPreference("keep-blog-tab", true).value) {
+            tabs.select(Object.getOwnPropertyNames(containers)[parseInt(docCookies.getItem("blogTab"))])
+        }
     }
 
     $.ajax({

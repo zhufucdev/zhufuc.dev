@@ -383,7 +383,7 @@
     btnUpload.addEventListener('click', function () {
         let input = document.getElementById('file-upload');
         input.click();
-        input.addEventListener('change', function () {
+        input.onchange = function () {
             const file = this.files[0];
             const id = idInput.value;
             $.ajax({
@@ -400,7 +400,7 @@
                     M.toast({html: '无法上传' + file.name + ': ' + e.status})
                 }
             })
-        })
+        };
     });
 
     let deleteConfirm = document.getElementById('btn-delete-confirm'), modalDelete = M.Modal.getInstance(document.getElementById('modal-delete'));
