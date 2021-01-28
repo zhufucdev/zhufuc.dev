@@ -620,6 +620,10 @@ func blogFileBlackList(name string) bool {
 	return name == "header.json" || name == "rendered.html"
 }
 
+func opencraftPage(w http.ResponseWriter, r *http.Request) {
+	responseFile(w, "opencraft.html", false, r)
+}
+
 func redirect(uri string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://"+r.Host+r.URL.String()+uri, http.StatusMovedPermanently)
@@ -648,6 +652,7 @@ func main() {
 		http.HandleFunc("/manage", managePage)
 		http.HandleFunc("/settings", settingsPage)
 		http.HandleFunc("/blog", blogPage)
+		http.HandleFunc("/opencraft", opencraftPage)
 		// Process markdown render
 		for _, v := range os.Environ() {
 			if v == "RERENDER_MARKDOWN=true" {

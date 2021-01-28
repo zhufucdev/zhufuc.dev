@@ -1,5 +1,34 @@
 [
   {
+    "name": "BukkitHelper",
+    "subtitle": "Bukkit服务器与Android设备的桥梁",
+    "lang": "kt",
+    "category": "程序",
+    "description": {
+      "screenshots": [
+        ".../BukkitHelper/1.png",
+        ".../BukkitHelper/2.png"
+      ],
+      "status": 1,
+      "text": [
+        "本为OpenCraft服务器之附庸，今独立为项目，旨在监测与操作Bukkit服务器。",
+        "遵循Material Design 2设计标准与模块化项目原则。",
+        "网络层基于Netty架构，交互层创设独立接口，以此支持插件扩展。"
+      ]
+    },
+    "link": [
+      {
+        "text": "仓库",
+        "href": "https://github.com/zhufucdev/BukkitHelper"
+      },
+      {
+        "icon": "article",
+        "text": "开源协议",
+        "href": "https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
+      }
+    ]
+  },
+  {
     "name": "MCRE",
     "subtitle": "Minecraft Java版和基岩版的资源包编辑器在Android平台的实现",
     "lang": "kt",
@@ -16,7 +45,23 @@
         "生命周期为2019年4月至今。",
         "项目很可能因为zhufucdev学业的缘故而进展缓慢。"
       ]
-    }
+    },
+    "link": [
+      {
+        "text": "仓库",
+        "href": "https://github.com/zhufucdev/MCRE"
+      },
+      {
+        "icon": "collections_bookmark",
+        "text": "开发日志",
+        "href": "blog/McWeyaWfCUkx5FOZsrfH/"
+      },
+      {
+        "icon": "article",
+        "text": "开源协议",
+        "href": "https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
+      }
+    ]
   },
   {
     "name": "OpenCraft",
@@ -36,7 +81,18 @@
         "服务器周期性关闭，但项目开发不会停止。zhufucdev计划开发ServerScript作为服务器下一代的开发方式，同时降低门槛，争取让玩家也有机会参与开发。",
         "服务器在每年暑假开放，并推出季度更新。"
       ]
-    }
+    },
+    "link": [
+      {
+        "text": "仓库",
+        "href": "https://github.com/zhufucdev/OpenCraftProject"
+      },
+      {
+        "icon": "article",
+        "text": "开源协议",
+        "href": "https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
+      }
+    ]
   },
   {
     "name": "PCtoPE",
@@ -56,9 +112,19 @@
         "作为早期作品，其中有亮点，比如遵循Material Design初代的设计规范，不足也难以忽略，如写法不够规范，甚至有些冗余，zhufucdev因此认为该项目很难维护。",
         "为了跟进新的设计标准，以及将软件的功能推向更广范围，zhufucdev已将该项目归档，并转向新的开发过程。"
       ],
-      "github": "https://github.com/zhufucdev/PCtoPE",
       "license": "GPL-v3"
-    }
+    },
+    "link": [
+      {
+        "text": "仓库",
+        "href": "https://github.com/zhufucdev/PCtoPE"
+      },
+      {
+        "icon": "article",
+        "text": "开源协议",
+        "href": "https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
+      }
+    ]
   },
   {
     "name": "ScoreManager",
@@ -71,6 +137,17 @@
         "第一个C#作品，仅在横林高级中学小范围使用，生命周期为2019年10月至2019年12月。",
         "因为WinForm自身的局限性被归档。"
       ]
-    }
+    },
+    "link": [
+      {
+        "text": "仓库",
+        "href": "https://github.com/zhufucdev/ScoreManager"
+      },
+      {
+        "icon": "article",
+        "text": "开源协议",
+        "href": "https://www.gnu.org/licenses/gpl-3.0.zh-cn.html"
+      }
+    ]
   }
 ]

@@ -5,5 +5,6 @@
   "https_port": -1,
   "public_key": "cert.pem",
   "private_key": "privkey.pem",
-  "node_bin": "/usr/local/opt/node/bin"
+  "node_bin": "C:\\Program Files\\nodejs",
+  "notice": "This configuration isn't used on the real server."
 }

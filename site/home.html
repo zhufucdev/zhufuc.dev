@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>zhufucdev</title>
-    <meta name="google-site-verification" content="3PNwa8wNF8EbBQz2RTa9hG1eRzIsvacBWUjpkapZqvk" />
+    <meta name="google-site-verification" content="3PNwa8wNF8EbBQz2RTa9hG1eRzIsvacBWUjpkapZqvk"/>
     <link rel="stylesheet" href="/shared/materialize.css">
     <link rel="stylesheet" href="/shared/material-icons.css">
     <link rel="stylesheet" href="/shared/style.css">
@@ -16,6 +16,12 @@
     <script src="/shared/settings.js"></script>
     <script src="/shared/content-viewer.js"></script>
 </head>
+<style>
+    .icon-representative {
+        font-size: 30px;
+        vertical-align: middle
+    }
+</style>
 <body>
 <main>
     <div class="navbar-fixed">
@@ -115,13 +121,15 @@
     <div id="viewer-description" class="card-content" style="padding-top: 4px">
         <div class="card-panel red lighten-3 z-depth-0 white-text col s4 m4" style="width: 100%; line-height: 30px;"
              id="viewer-status-card">
-            <i class="material-icons" style="font-size: 30px; vertical-align: middle">error</i>
+            <i class="material-icons icon-representative">error</i>
             <span style="margin-left: 10px" id="viewer-status">开发状态</span>
         </div>
+        <div class="card-panel red lighten-3 z-depth-0 white-text col s4 m4" style="width: 100%; display: flex"
+             id="viewer-link-card"></div>
         <div class="card-panel red lighten-3 z-depth-0 white-text col s8 m8" style="width: 100%"
              id="viewer-description-card">
             <div style="line-height: 30px">
-                <i class="material-icons" style="font-size: 30px; vertical-align: middle">description</i>
+                <i class="material-icons icon-representative">description</i>
                 <span style="margin-left: 10px; font-size: larger; vertical-align: middle">简介</span>
                 <p id="viewer-description-text" style="margin-left: 10px"></p>
                 <div class="carousel carousel-slider no-autoinit" id="carousel"></div>
@@ -205,6 +213,7 @@
             viewer.rootElement.querySelector(selector).style.display = (r ? 'none' : null);
             return r
         }
+
         let descriptionLayout = viewer.rootElement.querySelector('#viewer-description');
         if (typeof project.description === "undefined") {
             descriptionLayout.style.display = 'none';
@@ -212,6 +221,7 @@
         } else {
             descriptionLayout.style.display = null;
         }
+
         function layout() {
             let isSmallLayout = descriptionLayout.parentElement === viewer.rootElement,
                 titleLayout = viewer.rootElement.querySelector('#viewer-title');
@@ -227,8 +237,10 @@
                 viewer.rootElement.insertAdjacentElement('beforeend', descriptionLayout);
             }
         }
+
+        window.addEventListener('resize', layout)
         window.onresize = layout;
-        viewer.onhide = () => window.onresize = null;
+        viewer.onhide = () => window.removeEventListener('resize', layout)
 
         layout();
         if (!hideUndefined('#viewer-status-card', project.description.status)) {
@@ -246,6 +258,27 @@
                 default:
                     status.textContent = '项目状态代码为' + project.description.status;
             }
+        }
+
+        if (!hideUndefined('#viewer-link-card', project.link)) {
+            let container = viewer.rootElement.querySelector('#viewer-link-card');
+
+            container.style.display = 'flex';
+
+            function linkRepresentative(obj) {
+                const icon = obj.icon ?? "language",
+                    text = obj.text ?? "链接",
+                    href = obj.href;
+                console.log(obj)
+                if (!href) return ""
+                return '<a class="center waves-effect waves-light white-text" style="flex: 1" href="' + href + '">' +
+                    '<i class="material-icons icon-representative">' + icon + '</i>' +
+                    '<div>' + text + '</div>' +
+                    '</a>'
+            }
+
+            container.innerHTML = "";
+            project.link.forEach((v) => container.insertAdjacentHTML('beforeend', linkRepresentative(v)))
         }
 
         if (!hideUndefined('#viewer-description-card', project.description.text)) {

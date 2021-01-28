@@ -9,6 +9,7 @@ function formatDate(date) {
 
 const MarkdownIt = require('markdown-it'), fs = require('fs'), path = require('path');
 const Highlight = require('highlight.js'), Cheerio = require('cheerio2');
+const MarkdownItVideo = require('@zhufucdev/markdown-it-video');
 let md = MarkdownIt({
     highlight: function (str, lang) {
         if (lang && Highlight.getLanguage(lang)) {
@@ -16,6 +17,8 @@ let md = MarkdownIt({
         }
         return ''
     }
+}).use(MarkdownItVideo, {
+    bilibili: {width: 640, height: 390}
 });
 let src = fs.readFileSync(path.join(target, 'content.md')).toString();
 let html = md.render(src).trim();
@@ -33,4 +36,5 @@ html = '<div class="card"> ' +
     '</div> </div>' +
     html;
 model('div#article').html(html);
+model('title').html(header.title + '——zhufucdev')
 console.log(model.html());
