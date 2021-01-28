@@ -7,7 +7,7 @@
   "dependencies": {
     "@zhufucdev/markdown-it-video": "^1.1.0",
     "cheerio2": "^1.0.0",
-    "highlight.js": "^9.18.1",
+    "highlight.js": "^10.4.1",
     "markdown-it": "^10.0.0"
   }
 }
